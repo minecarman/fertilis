@@ -1,0 +1,16 @@
+{
+  "name": "fertilis-backend",
+  "version": "1.0.0",
+  "description": "backend",
+  "type": "module",
+  "main": "node app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "minecarman",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5"
+  }
+}

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'chat_page.dart';
 import 'irrigation_page.dart';
 import 'recommendation_page.dart';
+import 'weather_page.dart';
+import 'wiki_page.dart';
+import 'yield_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,6 +24,9 @@ class HomePage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const ChatPage()),
               ),
             ),
+
+                const SizedBox(height: 20),
+
             ElevatedButton(
               child: const Text("Irrigation"),
               onPressed: () => Navigator.push(
@@ -28,11 +34,44 @@ class HomePage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const IrrigationPage()),
               ),
             ),
+
+                const SizedBox(height: 20),
+
             ElevatedButton(
               child: const Text("Crop Recommendation"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const RecommendationPage()),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              child: const Text("Weather Alert"),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WeatherPage()),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              child: const Text("Offline Wiki"),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WikiPage()),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              child: const Text("Yield Predictor"),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const YieldPage()),
               ),
             ),
           ],
