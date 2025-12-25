@@ -7,7 +7,7 @@ class RecommendationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Fertilis Recommendation")),
+      appBar: AppBar(title: const Text("Fertilis Ekin Asistanı")),
       body: FutureBuilder(
         future: CropService.getRecommendation(),
         builder: (context, snapshot) {

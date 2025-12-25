@@ -8,7 +8,7 @@ class WikiPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Fertilis Wiki")),
       body: const Center(
-        child: Text("Wiki infos will be added to this page"),
+        child: Text("wiki yabacam :P"),
       ),
     );
   }

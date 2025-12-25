@@ -6,9 +6,9 @@ class WeatherPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Fertilis Weather")),
+      appBar: AppBar(title: const Text("Fertilis Havadurumu")),
       body: const Center(
-        child: Text("Weather stuff will be added to this page"),
+        child: Text("hava durumu yabacam :P"),
       ),
     );
   }

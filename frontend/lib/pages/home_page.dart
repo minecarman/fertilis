@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              child: const Text("Chatbot"),
+              child: const Text("Sohbet Et"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ChatPage()),
@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 20),
 
             ElevatedButton(
-              child: const Text("Irrigation"),
+              child: const Text("Sulama"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const IrrigationPage()),
@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
                 const SizedBox(height: 20),
 
             ElevatedButton(
-              child: const Text("Crop Recommendation"),
+              child: const Text("Ekinler"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const RecommendationPage()),
@@ -48,7 +48,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             ElevatedButton(
-              child: const Text("Weather Alert"),
+              child: const Text("Hava Durumu"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const WeatherPage()),
@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             ElevatedButton(
-              child: const Text("Offline Wiki"),
+              child: const Text("Wiki Sayfası"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const WikiPage()),
@@ -68,7 +68,7 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
 
             ElevatedButton(
-              child: const Text("Yield Predictor"),
+              child: const Text("Kazançlar"),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const YieldPage()),

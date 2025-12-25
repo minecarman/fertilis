@@ -6,9 +6,9 @@ class YieldPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Fertilis Yield")),
+      appBar: AppBar(title: const Text("Fertilis Kar Asistanı")),
       body: const Center(
-        child: Text("Yield predictor will be added to this page"),
+        child: Text("bol kazançlar maşallah :P"),
       ),
     );
   }
