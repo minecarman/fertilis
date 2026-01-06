@@ -6,6 +6,7 @@ import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'recommendation_page.dart';
+import '../services/weather_service.dart'; // <-- Bunu en üste ekle
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -254,16 +255,25 @@ class _DashboardViewState extends State<DashboardView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --- GÖRSEL ALANI (Aynı kalıyor) ---
           Stack(
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1625246333195-58f21c018a2b?q=80&w=1000",
+                  "https://picsum.photos/seed/fertilis/800/400",
                   height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (c,e,s) => Container(height: 160, color: Colors.grey.shade300),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(height: 160, color: Colors.grey.shade100);
+                  },
+                  errorBuilder: (c, e, s) => Container(
+                    height: 160, 
+                    color: AppTheme.wikilocGreen.withValues(alpha: 0.1),
+                    child: const Center(child: Icon(Icons.landscape, size: 40, color: Colors.grey)),
+                  ),
                 ),
               ),
               Positioned(
@@ -283,6 +293,7 @@ class _DashboardViewState extends State<DashboardView> {
             ],
           ),
           
+          // --- İSTATİSTİKLER (BURASI ARTIK CANLI!) ---
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -297,15 +308,52 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 const SizedBox(height: 16),
                 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem(Icons.thermostat, "24°C", "Sıcaklık"),
-                    Container(height: 30, width: 1, color: Colors.grey.shade300),
-                    _buildStatItem(Icons.water_drop_outlined, "%45", "Nem"),
-                    Container(height: 30, width: 1, color: Colors.grey.shade300),
-                    _buildStatItem(Icons.wb_sunny_outlined, "Açık", "Durum"),
-                  ],
+                // FutureBuilder ile veriyi bekliyoruz
+                FutureBuilder<Map<String, dynamic>?>(
+                  future: WeatherService.getWeather(field.center.latitude, field.center.longitude),
+                  builder: (context, snapshot) {
+                    
+                    // 1. Durum: Yükleniyor
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: SizedBox(
+                          height: 20, 
+                          width: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.wikilocGreen)
+                        )
+                      );
+                    }
+
+                    // 2. Durum: Hata var veya Veri Yok
+                    if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+                      return const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: Colors.grey));
+                    }
+
+                    // 3. Durum: Veri Başarıyla Geldi!
+                    final data = snapshot.data!;
+                    final temp = data['temp']?.toString() ?? "-";
+                    final humidity = data['humidity']?.toString() ?? "-";
+                    
+                    // Açıklama çok uzunsa baş harfini büyütüp kısaltalım
+                    String desc = data['description']?.toString() ?? "-";
+                    if (desc.length > 1) {
+                      desc = desc[0].toUpperCase() + desc.substring(1);
+                    }
+                    if (desc.length > 10) { 
+                      desc = "${desc.substring(0, 10)}..."; // Çok uzunsa kes
+                    }
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatItem(Icons.thermostat, "$temp°C", "Sıcaklık"),
+                        Container(height: 30, width: 1, color: Colors.grey.shade300),
+                        _buildStatItem(Icons.water_drop_outlined, "%$humidity", "Nem"),
+                        Container(height: 30, width: 1, color: Colors.grey.shade300),
+                        _buildStatItem(Icons.wb_sunny_outlined, desc, "Durum"),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
