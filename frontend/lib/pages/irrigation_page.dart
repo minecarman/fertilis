@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/irrigation_service.dart';
+import '../models/field.dart';
+import 'fields_page.dart';
 
 class IrrigationPage extends StatefulWidget {
   const IrrigationPage({super.key});
@@ -8,26 +10,26 @@ class IrrigationPage extends StatefulWidget {
   State<IrrigationPage> createState() => _IrrigationPageState();
 }
 
-
-class _IrrigationPageState extends State<IrrigationPage> { 
-  final latController = TextEditingController(); // konum için latitude, longitude değişkenleri
-  final lonController = TextEditingController();
-
+class _IrrigationPageState extends State<IrrigationPage> {
+  Field? _selectedField;
   bool loading = false;
   Map<String, dynamic>? result;
 
   Future<void> analyze() async {
-    final lat = double.tryParse(latController.text);
-    final lon = double.tryParse(lonController.text);
-
-    if (lat == null || lon == null) return;
+    if (_selectedField == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen tarla seçiniz")));
+      return;
+    }
 
     setState(() {
       loading = true;
       result = null;
     });
 
-    final data = await IrrigationService.analyzeRain(lat, lon);
+    final data = await IrrigationService.analyzeRain(
+      _selectedField!.center.latitude, 
+      _selectedField!.center.longitude
+    );
 
     setState(() {
       result = data;
@@ -35,95 +37,95 @@ class _IrrigationPageState extends State<IrrigationPage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Fertilis Sulama Asistanı")),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-
-            Card(   // SULAMA TAKVIMI BURA YAPILACAK
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Takvim",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      "Takvim yabacam :P",
-                    ),
-                  ],
-                ),
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade100),
             ),
-
-            const SizedBox(height: 20),
-
-            Card(
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Bugün sulamalı mısın?",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-
-                    TextField( // Input lat
-                      controller: latController,
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: "Enlem"),
-                    ),
-                    TextField( // Input lon
-                      controller: lonController,
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: "Boylam"),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    ElevatedButton(
-                      onPressed: loading ? null : analyze,
-                      child: const Text("Kontrol Et"),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    if (loading) const CircularProgressIndicator(),
-
-                    if (result != null) ...[  // SONUÇ KISMI
-                      const SizedBox(height: 12),
-                      Text("Yağış: ${result!["rain"]} mm"),
-                      const SizedBox(height: 6),
-                      Text(
-                        "Sonuç: ${result!["decision"]}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ]
-                  ],
-                ),
-              ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue),
+                SizedBox(width: 12),
+                Expanded(child: Text("FAO-56 standardına göre, tarlanızın konumundaki buharlaşma verisi hesaplanır.")),
+              ],
             ),
-          ],
-        ),
+          ),
+          
+          const SizedBox(height: 20),
+
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Hangi tarlayı sulayacaksın?", style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<Field>(
+                      isExpanded: true,
+                      value: _selectedField,
+                      hint: const Text("Tarla Seçiniz"),
+                      items: myFields.map((f) => DropdownMenuItem(value: f, child: Text(f.name))).toList(),
+                      onChanged: (val) => setState(() => _selectedField = val),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: loading ? null : analyze,
+                    icon: const Icon(Icons.water_drop),
+                    label: const Text("Analiz Et"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          if (loading) const CircularProgressIndicator(),
+          
+          if (result != null)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: result!["decision"].toString().contains("gerek yok") ? Colors.green.shade50 : Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: result!["decision"].toString().contains("gerek yok") ? Colors.green : Colors.orange),
+              ),
+              child: Column(
+                children: [
+                  Text("Tahmini Yağış: ${result!["rain"]} mm", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 5),
+                  Text("${result!["decision"]}", textAlign: TextAlign.center),
+                ],
+              ),
+            )
+        ],
       ),
     );
   }

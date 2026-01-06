@@ -13,7 +13,7 @@ class Fertilis extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Fertilis',
-      theme: appTheme,
+      theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
       home: const HomePage(),
     );
