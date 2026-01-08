@@ -6,7 +6,7 @@ import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'recommendation_page.dart';
-import '../services/weather_service.dart'; // <-- Bunu en üste ekle
+import '../services/weather_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
