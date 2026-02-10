@@ -2,31 +2,41 @@ import express from "express";
 
 const router = express.Router();
 
-// GEÇİCİ HAFIZA (Veritabanı bağlanana kadar kullanıcılar burada duracak)
+// çakma database
 const users = []; 
 
-// KAYIT OL (Register)
+// kayıt
 router.post("/register", (req, res) => {
   try {
     const { full_name, email, password } = req.body;
 
-    // Basit doğrulama
+    // boş alan kontrol
     if (!email || !password || !full_name) {
       return res.status(400).json({ error: "Tüm alanları doldurunuz." });
     }
 
-    // Kullanıcı zaten var mı?
+    // mail kontrol
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Geçersiz e-posta formatı." });
+    }
+
+    // şifre kontrol
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Şifre en az 6 karakter olmalıdır." });
+    }
+
+    // kayıtlı mı kontrol
     const existingUser = users.find(u => u.email === email);
     if (existingUser) {
       return res.status(400).json({ error: "Bu e-posta zaten kayıtlı." });
     }
 
-    // Yeni kullanıcıyı kaydet
     const newUser = {
-      id: Date.now().toString(), // Rastgele ID
+      id: Date.now().toString(),
       full_name,
       email,
-      password, // Gerçek hayatta şifreler hash'lenmeli (bcrypt ile)!
+      password, 
     };
 
     users.push(newUser);
@@ -38,12 +48,11 @@ router.post("/register", (req, res) => {
   }
 });
 
-// GİRİŞ YAP (Login)
+// GİRİŞ YAP
 router.post("/login", (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Kullanıcıyı bul
     const user = users.find(u => u.email === email && u.password === password);
 
     if (user) {
