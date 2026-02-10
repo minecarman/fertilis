@@ -1,70 +1,79 @@
 import express from "express";
+import { supabase } from "../supabase.js";
 
 const router = express.Router();
 
-// çakma database
-const users = []; 
-
-// kayıt
-router.post("/register", (req, res) => {
+router.post("/register", async (req, res) => {
   try {
     const { full_name, email, password } = req.body;
 
-    // boş alan kontrol
+
     if (!email || !password || !full_name) {
       return res.status(400).json({ error: "Tüm alanları doldurunuz." });
     }
-
-    // mail kontrol
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: "Geçersiz e-posta formatı." });
-    }
-
-    // şifre kontrol
     if (password.length < 6) {
       return res.status(400).json({ error: "Şifre en az 6 karakter olmalıdır." });
     }
 
-    // kayıtlı mı kontrol
-    const existingUser = users.find(u => u.email === email);
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("email")
+      .eq("email", email)
+      .single();
+
     if (existingUser) {
       return res.status(400).json({ error: "Bu e-posta zaten kayıtlı." });
     }
 
-    const newUser = {
-      id: Date.now().toString(),
-      full_name,
-      email,
-      password, 
-    };
+    const { data, error } = await supabase
+      .from("users")
+      .insert([{ full_name, email, password }])
+      .select();
 
-    users.push(newUser);
-    console.log("Yeni Kayıt:", newUser);
+    if (error) {
+      console.error("Supabase Hatası:", error);
+      return res.status(500).json({ error: "Kayıt sırasında hata oluştu." });
+    }
 
-    res.status(201).json({ message: "Kayıt başarılı", user: newUser });
+    console.log("yeni kullanıcı:", email);
+    res.status(201).json({ message: "Kayıt başarılı", user: data[0] });
+
   } catch (e) {
+    console.error("Sunucu Hatası:", e);
     res.status(500).json({ error: "Sunucu hatası" });
   }
 });
 
-// GİRİŞ YAP
-router.post("/login", (req, res) => {
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-      res.json({ 
-        success: true, 
-        message: "Giriş başarılı", 
-        user: { id: user.id, full_name: user.full_name, email: user.email }
-      });
-    } else {
-      res.status(401).json({ error: "Hatalı e-posta veya şifre" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "E-posta ve şifre gereklidir." });
     }
+
+    const { data: user, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .eq("password", password)
+      .single();
+
+    if (error || !user) {
+      return res.status(401).json({ error: "E-posta veya şifre hatalı." });
+    }
+
+    console.log("Giriş Başarılı:", user.full_name);
+    
+    const { password: _, ...userWithoutPassword } = user; 
+
+    res.json({ 
+      message: "Giriş başarılı", 
+      user: userWithoutPassword 
+    });
+
   } catch (e) {
+    console.error("Login Hatası:", e);
     res.status(500).json({ error: "Sunucu hatası" });
   }
 });

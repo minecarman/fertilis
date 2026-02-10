@@ -89,7 +89,7 @@ class _RegisterPageState extends State<RegisterPage> {
         height: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: const AssetImage("assets/images/background.jpg"),
+            image: const AssetImage("assets/images/background.png"),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
               Colors.black.withValues(alpha: 0.3),
