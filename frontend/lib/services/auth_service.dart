@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import '../core/api_config.dart';
 
 class AuthService {
+  static String? currentUserEmail;
+  
   static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -14,6 +16,7 @@ class AuthService {
       final data = jsonDecode(response.body);
       
       if (response.statusCode == 200) {
+        currentUserEmail = email;
         return {"success": true, "data": data};
       } else {
         return {"success": false, "message": data['error'] ?? "Giriş başarısız"};
@@ -38,6 +41,7 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
+        currentUserEmail = email;
         return {"success": true, "data": data};
       } else {
         return {"success": false, "message": data['error'] ?? "Kayıt başarısız"};

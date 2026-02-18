@@ -5,6 +5,7 @@ import chatRoutes from "./routes/chat.routes.js";
 import irrigationRoutes from "./routes/irrigation.routes.js";
 import weatherRoutes from "./routes/weather.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import fieldRoutes from "./routes/field.routes.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.use("/", irrigationRoutes);
 app.use("/chat", chatRoutes);
 app.use("/weather", weatherRoutes);
 app.use("/auth", authRoutes);
+app.use("/api/fields", fieldRoutes);
 app.listen(3000, "0.0.0.0", () => {
   console.log("Server running on port 3000");
 });

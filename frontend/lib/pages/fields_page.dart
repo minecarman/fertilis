@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:uuid/uuid.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart'; 
 import '../models/field.dart';
+import '../services/field_service.dart';
+import '../services/auth_service.dart';
 import '../core/theme.dart';
-
 
 List<Field> myFields = [];
 
@@ -22,8 +22,24 @@ class _FieldsPageState extends State<FieldsPage> {
   bool _isDrawing = false;
   final List<LatLng> _currentPoints = [];
   
-  // mskü ilk konum
-  final LatLng _center = const LatLng(37.1627, 28.3712); 
+  final LatLng _center = const LatLng(37.1627, 28.3712);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFields();
+  }
+
+  void _loadFields() async {
+    String email = AuthService.currentUserEmail ?? "test@user.com";
+    final fields = await FieldService.getFields(email);
+    
+    if (mounted) {
+      setState(() {
+        myFields = fields;
+      });
+    }
+  }
 
   Future<void> _moveToCurrentLocation() async {
     bool serviceEnabled;
@@ -31,43 +47,19 @@ class _FieldsPageState extends State<FieldsPage> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Konum servisi kapalı. Lütfen açınız.")),
-        );
-      }
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Konum servisi kapalı.")));
       return;
     }
-
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Konum izni verilmedi.")),
-          );
-        }
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Konum izni kalıcı olarak reddedildi, ayarlardan açmalısınız.")),
-        );
-      }
-      return;
+      if (permission == LocationPermission.denied) return;
     }
 
     try {
       final position = await Geolocator.getCurrentPosition();
-      _mapController.move(
-        LatLng(position.latitude, position.longitude), 
-        16.0 
-      );
+      _mapController.move(LatLng(position.latitude, position.longitude), 16.0);
     } catch (e) {
       debugPrint("Konum hatası: $e");
     }
@@ -81,15 +73,15 @@ class _FieldsPageState extends State<FieldsPage> {
     }
   }
 
-  void _saveField() {
+  void _showSaveDialog() {
     if (_currentPoints.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bir alan oluşturmak için en az 3 nokta seçmelisin!")),
+        const SnackBar(content: Text("En az 3 nokta gerekli!")),
       );
       return;
     }
 
-    final TextEditingController nameController = TextEditingController();
+    final nameController = TextEditingController();
 
     showDialog(
       context: context,
@@ -97,7 +89,10 @@ class _FieldsPageState extends State<FieldsPage> {
         title: const Text("Tarlayı Kaydet"),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(hintText: "Tarla Adı (Örn: Kuzey Yonca)"),
+          decoration: const InputDecoration(
+            hintText: "Tarla Adı (Örn: Aşağı Zeytinlik)",
+            icon: Icon(Icons.label),
+          ),
         ),
         actions: [
           TextButton(
@@ -105,31 +100,41 @@ class _FieldsPageState extends State<FieldsPage> {
             child: const Text("İptal"),
           ),
           ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               Navigator.pop(ctx);
-              
-              final newField = Field(
-                id: const Uuid().v4(),
-                name: nameController.text.isEmpty ? "Tarla ${myFields.length+1}" : nameController.text,
-                boundaries: List.from(_currentPoints),
-                center: _currentPoints[0], 
-              );
-              
-              setState(() {
-                myFields.add(newField);
-                _currentPoints.clear();
-                _isDrawing = false;
-              });
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Tarla başarıyla kaydedildi!")),
-              );
+              _saveFieldToBackend(nameController.text);
             },
             child: const Text("Kaydet"),
           ),
         ],
       ),
     );
+  }
+
+  void _saveFieldToBackend(String name) async {
+    String email = AuthService.currentUserEmail ?? "test@user.com";
+    
+    final newField = Field(
+      userEmail: email,
+      name: name.isEmpty ? "Yeni Tarla ${myFields.length + 1}" : name,
+      area: 10.0, 
+      points: List.from(_currentPoints),
+    );
+
+    final success = await FieldService.saveField(newField);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tarla başarıyla kaydedildi!")));
+      setState(() {
+        _isDrawing = false;
+        _currentPoints.clear();
+      });
+      _loadFields(); 
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Kayıt sırasında hata oluştu!"), backgroundColor: Colors.red));
+    }
   }
 
   @override
@@ -142,7 +147,7 @@ class _FieldsPageState extends State<FieldsPage> {
             options: MapOptions(
               initialCenter: _center,
               initialZoom: 15.0,
-              onTap: _handleTap, 
+              onTap: _handleTap,
             ),
             children: [
               TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
@@ -150,11 +155,12 @@ class _FieldsPageState extends State<FieldsPage> {
               PolygonLayer(
                 polygons: myFields.map((field) {
                   return Polygon(
-                    points: field.boundaries,
-                    color: AppTheme.wikilocGreen.withValues(alpha: 0.4),
-                    borderColor: AppTheme.darkGreen,
+                    points: field.points,
+                    color: AppTheme.wikilocGreen.withValues(alpha: 0.4), 
+                    borderColor: AppTheme.darkGreen, 
                     borderStrokeWidth: 2,
                     label: field.name,
+                    labelStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                   );
                 }).toList(),
               ),
@@ -190,7 +196,7 @@ class _FieldsPageState extends State<FieldsPage> {
                 ),
             ],
           ),
-          
+
           if (_isDrawing)
             Positioned(
               top: 50,
@@ -204,7 +210,7 @@ class _FieldsPageState extends State<FieldsPage> {
                 ),
                 child: Text(
                   _currentPoints.isEmpty 
-                      ? "Haritaya dokunarak köşeleri belirle" 
+                      ? "Haritaya dokunarak sınırları belirle" 
                       : "${_currentPoints.length} nokta eklendi",
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
@@ -239,17 +245,15 @@ class _FieldsPageState extends State<FieldsPage> {
                     icon: const Icon(Icons.close),
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.red,
-                    elevation: 4,
                   ),
                   const SizedBox(width: 16),
                   FloatingActionButton.extended(
                     heroTag: "save_btn",
-                    onPressed: _saveField,
-                    label: const Text("Kaydet"),
+                    onPressed: _showSaveDialog,
+                    label: const Text("Bitir"),
                     icon: const Icon(Icons.check),
-                    backgroundColor: AppTheme.wikilocGreen, // renk
+                    backgroundColor: AppTheme.wikilocGreen, 
                     foregroundColor: Colors.white,
-                    elevation: 4,
                   ),
                 ] else ...[
                   FloatingActionButton.extended(
@@ -259,8 +263,6 @@ class _FieldsPageState extends State<FieldsPage> {
                     icon: const Icon(Icons.add_location_alt_outlined),
                     backgroundColor: Colors.white,
                     foregroundColor: AppTheme.wikilocGreen,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                 ],
               ],
