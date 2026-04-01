@@ -1,34 +1,30 @@
 import 'package:flutter/material.dart';
 import '../services/irrigation_service.dart';
 import '../models/field.dart';
-import 'fields_page.dart';
 
 class IrrigationPage extends StatefulWidget {
-  const IrrigationPage({super.key});
+  final Field field; // HomePage'den gelen tarla
+
+  const IrrigationPage({super.key, required this.field});
 
   @override
   State<IrrigationPage> createState() => _IrrigationPageState();
 }
 
 class _IrrigationPageState extends State<IrrigationPage> {
-  Field? _selectedField;
   bool loading = false;
   Map<String, dynamic>? result;
 
   Future<void> analyze() async {
-    if (_selectedField == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen tarla seçiniz")));
-      return;
-    }
-
     setState(() {
       loading = true;
       result = null;
     });
 
+    // Artık seçili tarla kontrolüne gerek yok, widget.field doğrudan kullanılıyor
     final data = await IrrigationService.analyzeRain(
-      _selectedField!.center.latitude, 
-      _selectedField!.center.longitude
+      widget.field.center.latitude, 
+      widget.field.center.longitude
     );
 
     setState(() {
@@ -71,23 +67,27 @@ class _IrrigationPageState extends State<IrrigationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Hangi tarlayı sulayacaksın?", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text("Analiz Edilecek Tarla", style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 
+                // Dropdown yerine seçili tarlayı gösteren şık bir kutu
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<Field>(
-                      isExpanded: true,
-                      value: _selectedField,
-                      hint: const Text("Tarla Seçiniz"),
-                      items: myFields.map((f) => DropdownMenuItem(value: f, child: Text(f.name))).toList(),
-                      onChanged: (val) => setState(() => _selectedField = val),
-                    ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.location_on, color: Colors.green[700], size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.field.name, 
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      ),
+                    ],
                   ),
                 ),
 

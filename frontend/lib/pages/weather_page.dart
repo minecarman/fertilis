@@ -1,30 +1,36 @@
 import 'package:flutter/material.dart';
 import '../services/weather_service.dart';
 import '../models/field.dart';
-import 'fields_page.dart';
 
 class WeatherPage extends StatefulWidget {
-  const WeatherPage({super.key});
+  final Field field; // HomePage'den gelen tarla
+
+  const WeatherPage({super.key, required this.field});
 
   @override
   State<WeatherPage> createState() => _WeatherPageState();
 }
 
 class _WeatherPageState extends State<WeatherPage> {
-  Field? _selectedField;
   bool loading = false;
   Map<String, dynamic>? weatherData;
 
-  void _fetchWeather(Field field) async {
+  @override
+  void initState() {
+    super.initState();
+    // Sayfa açıldığında otomatik olarak veriyi çek
+    _fetchWeather();
+  }
+
+  void _fetchWeather() async {
     setState(() {
-      _selectedField = field;
       loading = true;
       weatherData = null;
     });
 
     final data = await WeatherService.getWeather(
-      field.center.latitude,
-      field.center.longitude,
+      widget.field.center.latitude,
+      widget.field.center.longitude,
     );
 
     setState(() {
@@ -39,48 +45,35 @@ class _WeatherPageState extends State<WeatherPage> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
+          // Seçili tarlayı belirten başlık kısmı
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<Field>(
-                isExpanded: true,
-                hint: const Text("Hangi tarlanın havasına bakacağız?"),
-                value: _selectedField,
-                items: myFields.map((field) {
-                  return DropdownMenuItem(
-                    value: field,
-                    child: Text(field.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) _fetchWeather(val);
-                },
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.map, color: Colors.blueGrey, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  "${widget.field.name} Havası", 
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ],
             ),
           ),
           
-          // hiç tarla yoksa uyarı
-          if (myFields.isEmpty)
-             Padding(
-               padding: const EdgeInsets.only(top: 12.0),
-               child: Text(
-                 "Henüz kayıtlı tarlan yok. Önce haritadan ekle.", 
-                 style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-               ),
-             ),
-
           const SizedBox(height: 30),
 
           if (loading)
             const CircularProgressIndicator()
           else if (weatherData != null)
             _buildWeatherInfo()
-          else if (_selectedField != null)
+          else
              const Text("Hava durumu bilgisi alınamadı.", style: TextStyle(color: Colors.red)),
         ],
       ),
@@ -97,7 +90,6 @@ class _WeatherPageState extends State<WeatherPage> {
         
         const SizedBox(height: 10),
 
-        // OpenWeatherMap ikon
         Image.network(
           "https://openweathermap.org/img/wn/${weatherData!['icon']}@4x.png",
           width: 120,
@@ -105,13 +97,11 @@ class _WeatherPageState extends State<WeatherPage> {
           errorBuilder: (context, error, stackTrace) => const Icon(Icons.wb_sunny, size: 80, color: Colors.orange),
         ),
 
-        // sıcaklık
         Text(
           "${weatherData!['temp']}°C",
           style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.blueAccent),
         ),
         
-        // hava acıklaması
         Text(
           weatherData!['description'].toString().toUpperCase(),
           style: const TextStyle(fontSize: 16, letterSpacing: 1.2, fontWeight: FontWeight.w600),

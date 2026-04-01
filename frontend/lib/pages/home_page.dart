@@ -5,7 +5,7 @@ import 'fields_page.dart';
 import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
-import 'recommendation_page.dart';
+import 'crop_page.dart';
 import '../services/weather_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -163,19 +163,37 @@ class _DashboardViewState extends State<DashboardView> {
               icon: Icons.water_drop,
               color: Colors.blue,
               title: "Sulama Analizi",
-              onTap: () => _showToolModal(context, "Sulama Asistanı", const IrrigationPage()),
+              onTap: () {
+                if (activeField != null) {
+                  _showToolModal(context, "Sulama Asistanı", IrrigationPage(field: activeField!));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen önce bir tarla seçin")));
+                }
+              },
             ),
             _buildActionCard(
               icon: Icons.grass,
               color: Colors.green,
               title: "Ekin Önerisi",
-              onTap: () => _showToolModal(context, "Ekin Önerisi", const RecommendationPage()),
+              onTap: () {
+                if (activeField != null) {
+                  _showToolModal(context, "Ekin Önerisi", CropPage(field: activeField!));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen önce bir tarla seçin")));
+                }
+              },
             ),
             _buildActionCard(
               icon: Icons.cloud,
               color: Colors.orange,
               title: "Hava Durumu",
-              onTap: () => _showToolModal(context, "Detaylı Hava Durumu", const WeatherPage()),
+              onTap: () {
+                if (activeField != null) {
+                  _showToolModal(context, "Detaylı Hava Durumu", WeatherPage(field: activeField!));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen önce bir tarla seçin")));
+                }
+              },
             ),
              _buildActionCard(
               icon: Icons.currency_lira,
@@ -255,7 +273,7 @@ class _DashboardViewState extends State<DashboardView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- GÖRSEL ALANI (Aynı kalıyor) ---
+          // --- GÖRSEL ALANI ---
           Stack(
             children: [
               ClipRRect(
@@ -293,7 +311,6 @@ class _DashboardViewState extends State<DashboardView> {
             ],
           ),
           
-          // --- İSTATİSTİKLER (BURASI ARTIK CANLI!) ---
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -308,7 +325,6 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 const SizedBox(height: 16),
                 
-                // FutureBuilder ile veriyi bekliyoruz
                 FutureBuilder<Map<String, dynamic>?>(
                   future: WeatherService.getWeather(field.center.latitude, field.center.longitude),
                   builder: (context, snapshot) {
@@ -324,17 +340,14 @@ class _DashboardViewState extends State<DashboardView> {
                       );
                     }
 
-                    // 2. Durum: Hata var veya Veri Yok
                     if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
                       return const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: Colors.grey));
                     }
 
-                    // 3. Durum: Veri Başarıyla Geldi!
                     final data = snapshot.data!;
                     final temp = data['temp']?.toString() ?? "-";
                     final humidity = data['humidity']?.toString() ?? "-";
                     
-                    // Açıklama çok uzunsa baş harfini büyütüp kısaltalım
                     String desc = data['description']?.toString() ?? "-";
                     if (desc.length > 1) {
                       desc = desc[0].toUpperCase() + desc.substring(1);
