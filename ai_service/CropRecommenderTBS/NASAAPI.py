@@ -28,7 +28,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data"
-OUTPUT_FILE = DATA_DIR / "real_world_crop_data.csv"
+OUTPUT_FILE = DATA_DIR / "master_crop_dataset.csv"
 
 # ─── Real agricultural locations for each crop ────────────────────────────────
 # Each entry: (latitude, longitude, region_name)
@@ -345,6 +345,42 @@ def main():
             "N", "P", "K", "temperature", "humidity", "ph",
             "rainfall", "season_length", "altitude"]
     df = df[cols]
+
+    # --- NASAPlusNPK integration: Adding missing NPK, ph, altitude ---
+    CROP_NPK_BASE = {
+        "olive": {"N": 35, "P": 18, "K": 55}, "fig": {"N": 30, "P": 15, "K": 50},
+        "almond": {"N": 40, "P": 22, "K": 60}, "wheat": {"N": 75, "P": 42, "K": 48},
+        "lentil": {"N": 22, "P": 48, "K": 55}, "chickpea": {"N": 25, "P": 55, "K": 52},
+        "rice": {"N": 105, "P": 48, "K": 55}, "banana": {"N": 100, "P": 72, "K": 200},
+        "sugarcane": {"N": 140, "P": 55, "K": 120}, "maize": {"N": 115, "P": 48, "K": 72},
+        "cotton": {"N": 120, "P": 58, "K": 85}, "tomato": {"N": 125, "P": 52, "K": 155},
+        "grape": {"N": 55, "P": 32, "K": 110}, "citrus": {"N": 85, "P": 38, "K": 85},
+        "mango": {"N": 70, "P": 42, "K": 100}
+    }
+    
+    np.random.seed(42)
+    for index, row in df.iterrows():
+        crop = row["crop"]
+        df.at[index, "N"] = CROP_NPK_BASE[crop]["N"] + np.random.randint(-3, 4)
+        df.at[index, "P"] = CROP_NPK_BASE[crop]["P"] + np.random.randint(-3, 4)
+        df.at[index, "K"] = CROP_NPK_BASE[crop]["K"] + np.random.randint(-3, 4)
+        
+        if pd.isna(row["ph"]): df.at[index, "ph"] = round(np.random.uniform(6.0, 7.5), 1)
+        if pd.isna(row["altitude"]): df.at[index, "altitude"] = round(np.random.uniform(50, 200), 1)
+
+    # Standardize columns with master dataset logic: Drop geography, rename 'crop' to 'label'
+    df = df.rename(columns={"crop": "label"})
+    df = df.drop(columns=["region", "latitude", "longitude"], errors="ignore")
+    
+    # OUTPUT_FILE is master_crop_dataset.csv
+    OUTPUT_FILE = DATA_DIR / "master_crop_dataset.csv"
+    
+    # Append to existing master database if it exists, otherwise create
+    if OUTPUT_FILE.exists():
+        existing_df = pd.read_csv(OUTPUT_FILE)
+        df = pd.concat([existing_df, df], ignore_index=True)
+        # Drop duplicates if they were generated over multiple runs
+        df = df.drop_duplicates()
 
     df.to_csv(OUTPUT_FILE, index=False)
 
