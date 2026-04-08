@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme.dart';
-import 'pages/login_page.dart';
+import 'core/app_router.dart';
 import 'providers/auth_provider.dart';
 
 void main() {
@@ -20,11 +20,11 @@ class Fertilis extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Fertilis',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      routerConfig: AppRouter.router,
     );
   }
 }

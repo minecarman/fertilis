@@ -9,7 +9,7 @@ class WeatherService {
   static Future<Either<String, Weather>> getWeather(double lat, double lon) async {
     try {
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/weather"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/weather"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "lat": lat,

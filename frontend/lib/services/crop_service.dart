@@ -8,7 +8,7 @@ class CropService {
   static Future<List<Crop>> getRecommendations(double lat, double lng) async {
     try {
       final response = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/api/recommendations'),
+        Uri.parse('${ApiConfig.baseUrl}/api/v1/recommendations'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'lat': lat,

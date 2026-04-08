@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../core/theme.dart';
-import 'login_page.dart';
-import 'edit_profile_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -65,10 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => const EditProfilePage())
-                    );
+                    context.pushNamed('edit-profile');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.wikilocGreen,
@@ -107,10 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   "Çıkış Yap", 
                   () {
                     Provider.of<AuthProvider>(context, listen: false).logout();
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
-                      (Route<dynamic> route) => false,
-                    );
+                    context.goNamed('login');
                   }, 
                   color: Colors.red
                 ),

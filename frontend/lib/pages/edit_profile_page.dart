@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../core/theme.dart';
 import '../services/auth_service.dart';
@@ -64,7 +65,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profil güncellendi.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
         );
-        Navigator.pop(context);
+        
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.goNamed('profile');
+        }
       }
     );
   }

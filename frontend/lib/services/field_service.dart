@@ -9,7 +9,7 @@ class FieldService {
   static Future<Either<String, bool>> saveField(Field field) async {
     try {
       final res = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/api/fields/add"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/fields/add"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(field.toJson()),
       );
@@ -24,7 +24,7 @@ class FieldService {
 
   static Future<Either<String, List<Field>>> getFields(String email) async {
     try {
-      final res = await http.get(Uri.parse("${ApiConfig.baseUrl}/api/fields/$email"));
+      final res = await http.get(Uri.parse("${ApiConfig.baseUrl}/api/v1/fields/$email"));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body) as List;
         return Right(data.map((e) => Field.fromJson(e)).toList());

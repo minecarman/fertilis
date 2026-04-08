@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:fpdart/fpdart.dart' hide State;
 import '../models/field.dart';
 import '../core/theme.dart';
 import 'fields_page.dart';
@@ -6,8 +8,6 @@ import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'crop_page.dart';
-import 'profile_page.dart';
-import 'package:fpdart/fpdart.dart' hide State;
 import '../models/weather.dart';
 import '../services/weather_service.dart';
 
@@ -103,7 +103,7 @@ class _DashboardViewState extends State<DashboardView> {
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
+                context.pushNamed('profile');
               },
               child: const CircleAvatar(
                 radius: 16,
@@ -246,7 +246,13 @@ class _DashboardViewState extends State<DashboardView> {
                   Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.grey),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        Navigator.of(context).pop();
+                      }
+                    },
                   ),
                 ],
               ),

@@ -7,7 +7,7 @@ class ChatService {
   static Future<Either<String, String>> sendMessage(String message) async {
     try {
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/chat"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/chat"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"message": message}),
       );

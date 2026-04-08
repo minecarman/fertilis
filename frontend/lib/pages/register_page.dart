@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 
@@ -82,7 +83,11 @@ class _RegisterPageState extends State<RegisterPage> {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pop(context);
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.goNamed('login');
+          }
         },
       );
     }
@@ -257,7 +262,11 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.pop(context); 
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.goNamed('login');
+                            }
                           },
                           child: const Text(
                             "Giriş Yap",

@@ -6,7 +6,8 @@ import irrigationRoutes from "./routes/irrigation.routes.js";
 import weatherRoutes from "./routes/weather.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import fieldRoutes from "./routes/field.routes.js";
-import recommendationRoutes from './routes/recommendation.routes.js'
+import recommendationRoutes from './routes/recommendation.routes.js';
+import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
@@ -14,12 +15,18 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/", irrigationRoutes);
-app.use("/chat", chatRoutes);
-app.use("/weather", weatherRoutes);
-app.use("/auth", authRoutes);
-app.use("/api/fields", fieldRoutes);
-app.use('/api/recommendations', recommendationRoutes);
+
+// API v1 Routes
+app.use("/api/v1/irrigation", irrigationRoutes);
+app.use("/api/v1/chat", chatRoutes);
+app.use("/api/v1/weather", weatherRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/fields", fieldRoutes);
+app.use("/api/v1/recommendations", recommendationRoutes);
+
+// Global Error Handler Middleware
+app.use(errorHandler);
+
 app.listen(3000, "0.0.0.0", () => {
   console.log("Server running on port 3000");
 });

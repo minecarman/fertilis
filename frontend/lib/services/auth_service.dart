@@ -8,7 +8,7 @@ class AuthService {
   static Future<Either<String, User>> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/auth/login"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/login"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"email": email, "password": password}),
       );
@@ -28,7 +28,7 @@ class AuthService {
   static Future<Either<String, User>> register(String fullName, String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/auth/register"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/register"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "full_name": fullName,
@@ -55,7 +55,7 @@ class AuthService {
   static Future<Either<String, User>> updateProfile(String oldEmail, String newEmail, String fullName) async {
     try {
       final response = await http.put(
-        Uri.parse("${ApiConfig.baseUrl}/auth/profile"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/auth/profile"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "old_email": oldEmail,

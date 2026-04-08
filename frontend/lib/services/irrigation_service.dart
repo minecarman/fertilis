@@ -9,7 +9,7 @@ class IrrigationService {
       double lat, double lon) async {
     try {
       final response = await http.post(
-        Uri.parse("${ApiConfig.baseUrl}/irrigation"),
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/irrigation"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "lat": lat,
