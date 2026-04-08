@@ -1,7 +1,7 @@
 {
   "model_type": "XGBoost Classifier",
   "dataset_type": "Realistic FAO/ISRIC Simulated (Noisy/Overlapped)",
-  "accuracy": 0.8931,
+  "accuracy": 0.9346,
   "crops": [
     "almond",
     "apple",
@@ -45,23 +45,12 @@
     "N",
     "P",
     "K",
-    "temperature",
-    "humidity",
     "ph",
-    "rainfall",
-    "season_length",
-    "altitude",
-    "npk_total",
-    "n_ratio",
-    "p_ratio",
-    "k_ratio",
-    "n_to_p",
-    "n_to_k",
-    "humidity_temp",
-    "rainfall_per_temp",
-    "ph_deviation_from_neutral",
-    "rain_per_season",
-    "temp_altitude"
+    "temp_summer",
+    "temp_winter",
+    "rain_summer",
+    "rain_winter",
+    "altitude"
   ],
-  "trained_at": "2026-04-08T18:30:39.783806"
+  "trained_at": "2026-04-09T01:32:44.439424"
 }

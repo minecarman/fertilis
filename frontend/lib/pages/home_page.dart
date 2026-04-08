@@ -7,7 +7,7 @@ import 'fields_page.dart';
 import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
-import 'crop_page.dart';
+import 'recommendation_page.dart';
 import '../models/weather.dart';
 import '../services/weather_service.dart';
 
@@ -185,7 +185,7 @@ class _DashboardViewState extends State<DashboardView> {
               title: "Ekin Önerisi",
               onTap: () {
                 if (activeField != null) {
-                  _showToolModal(context, "Ekin Önerisi", CropPage(field: activeField!));
+                  _showToolModal(context, "Ekin Önerisi", RecommendationPage(field: activeField!));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen önce bir tarla seçin")));
                 }

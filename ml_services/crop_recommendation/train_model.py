@@ -48,7 +48,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data"
 MODELS_DIR = PROJECT_ROOT / "models"
 REPORTS_DIR = PROJECT_ROOT / "reports"
-DATA_FILE = DATA_DIR / "master_crop_dataset.csv"
+DATA_FILE = DATA_DIR / "seasonal_crop_dataset.csv"
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 FEATURES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall", "season_length", "altitude"]
@@ -72,21 +72,6 @@ def load_data() -> pd.DataFrame:
     return df
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
-    """ Agronomic feature engineering. """
-    df = df.copy()
-    df["npk_total"] = df["N"] + df["P"] + df["K"]
-    npk_sum = df["npk_total"] + 1e-8
-    df["n_ratio"] = df["N"] / npk_sum
-    df["p_ratio"] = df["P"] / npk_sum
-    df["k_ratio"] = df["K"] / npk_sum
-    df["n_to_p"] = df["N"] / (df["P"] + 1e-8)
-    df["n_to_k"] = df["N"] / (df["K"] + 1e-8)
-    df["humidity_temp"] = df["humidity"] * df["temperature"] / 100
-    df["rainfall_per_temp"] = df["rainfall"] / (df["temperature"] + 1e-8)
-    df["ph_deviation_from_neutral"] = abs(df["ph"] - 7.0)
-    # New v2 features
-    df["rain_per_season"] = df["rainfall"] / (df["season_length"] + 1e-8)
-    df["temp_altitude"] = df["temperature"] / (df["altitude"] + 1.0)  # higher altitude = cooler
     return df
 
 
