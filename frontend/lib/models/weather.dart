@@ -5,6 +5,7 @@ class Weather {
   final String city;
   final String icon;
   final double wind;
+  final String? date;
 
   Weather({
     required this.temp,
@@ -13,6 +14,7 @@ class Weather {
     required this.city,
     required this.icon,
     required this.wind,
+    this.date,
   });
 
   factory Weather.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Weather {
       city: json['city']?.toString() ?? 'Bilinmeyen Konum',
       icon: json['icon']?.toString() ?? '01d',
       wind: (json['wind'] ?? 0.0).toDouble(),
+      date: json['date']?.toString(),
     );
   }
 
@@ -34,6 +37,7 @@ class Weather {
       'city': city,
       'icon': icon,
       'wind': wind,
+      'date': date,
     };
   }
 }
