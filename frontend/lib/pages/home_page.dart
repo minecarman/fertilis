@@ -6,6 +6,7 @@ import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'crop_page.dart';
+import 'profile_page.dart';
 import '../services/weather_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -96,12 +97,17 @@ class _DashboardViewState extends State<DashboardView> {
         elevation: 0,
         actions: [
           IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: AppTheme.backgroundGrey,
-              child: Icon(Icons.person, color: AppTheme.wikilocGreen, size: 20),
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
+              },
+              child: const CircleAvatar(
+                radius: 16,
+                backgroundColor: AppTheme.backgroundGrey,
+                child: Icon(Icons.person, color: AppTheme.wikilocGreen, size: 20),
+              ),
             ),
           ),
         ],
@@ -422,21 +428,74 @@ class _DashboardViewState extends State<DashboardView> {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.add_location_alt_outlined, size: 80, color: Colors.grey.shade300),
-          const SizedBox(height: 20),
-          const Text("Kayıtlı tarla bulunamadı", style: TextStyle(color: AppTheme.textGrey, fontSize: 16)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () { 
-               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Aşağıdaki menüden 'Tarlalar' sekmesine geçiniz.")));
-            },
-            child: const Text("Tarla Ekle"),
-          )
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+                border: Border.all(color: Colors.grey.shade100),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.wikilocGreen.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.eco_rounded, size: 48, color: AppTheme.wikilocGreen),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Hoş Geldiniz!",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Henüz bir tarlanız bulunmuyor. Başlamak için şu adımları izleyebilirsiniz:",
+                    style: TextStyle(fontSize: 15, color: AppTheme.textGrey, height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildTutorialStep(Icons.touch_app_outlined, "Aşağıdaki menüden 'Tarlalar' sekmesine gidin."),
+                  const SizedBox(height: 16),
+                  _buildTutorialStep(Icons.add_location_alt_outlined, "Harita üzerinden tarlanızı oluşturun ve detaylarını girin."),
+                  const SizedBox(height: 16),
+                  _buildTutorialStep(Icons.dashboard_customize_outlined, "Analiz ve hava durumu verilerini bu sayfadan takip edin."),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildTutorialStep(IconData icon, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: AppTheme.wikilocGreen, size: 24),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 14, color: AppTheme.textBlack, height: 1.4),
+          ),
+        ),
+      ],
     );
   }
 }

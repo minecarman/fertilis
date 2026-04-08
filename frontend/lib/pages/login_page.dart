@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import 'home_page.dart';
 import 'register_page.dart';
@@ -33,6 +35,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if (res['success']) {
       if (mounted) {
+        Provider.of<AuthProvider>(context, listen: false).setUser(
+          email,
+          res['data']['user']?['full_name'],
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),

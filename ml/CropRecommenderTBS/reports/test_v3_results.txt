@@ -1,0 +1,109 @@
+=======================================================
+Test 1: Olive conditions (Mediterranean)
+=======================================================
+{
+  "success": true,
+  "top_recommendation": "olive",
+  "confidence": 0.9898,
+  "recommendations": [
+    {
+      "crop": "olive",
+      "confidence": 0.9898
+    },
+    {
+      "crop": "fig",
+      "confidence": 0.0084
+    },
+    {
+      "crop": "almond",
+      "confidence": 0.0016
+    }
+  ],
+  "warnings": [],
+  "input_summary": {
+    "N": 30.0,
+    "P": 15.0,
+    "K": 50.0,
+    "temperature": 18.0,
+    "humidity": 55.0,
+    "ph": 7.8,
+    "rainfall": 500.0,
+    "season_length": 240.0,
+    "altitude": 350.0
+  }
+}
+
+=======================================================
+Test 2: Rice conditions (Tropical)
+=======================================================
+{
+  "success": true,
+  "top_recommendation": "rice",
+  "confidence": 0.9997,
+  "recommendations": [
+    {
+      "crop": "rice",
+      "confidence": 0.9997
+    },
+    {
+      "crop": "maize",
+      "confidence": 0.0001
+    },
+    {
+      "crop": "sugarcane",
+      "confidence": 0.0001
+    }
+  ],
+  "warnings": [],
+  "input_summary": {
+    "N": 110.0,
+    "P": 50.0,
+    "K": 55.0,
+    "temperature": 28.0,
+    "humidity": 85.0,
+    "ph": 5.8,
+    "rainfall": 1500.0,
+    "season_length": 140.0,
+    "altitude": 20.0
+  }
+}
+
+=======================================================
+Test 3: Wheat conditions (Temperate)
+=======================================================
+{
+  "success": true,
+  "top_recommendation": "wheat",
+  "confidence": 0.9998,
+  "recommendations": [
+    {
+      "crop": "wheat",
+      "confidence": 0.9998
+    },
+    {
+      "crop": "lentil",
+      "confidence": 0.0001
+    },
+    {
+      "crop": "grape",
+      "confidence": 0.0
+    }
+  ],
+  "warnings": [],
+  "input_summary": {
+    "N": 80.0,
+    "P": 45.0,
+    "K": 45.0,
+    "temperature": 14.0,
+    "humidity": 50.0,
+    "ph": 6.8,
+    "rainfall": 550.0,
+    "season_length": 130.0,
+    "altitude": 400.0
+  }
+}
+
+=======================================================
+Test 4: Crop info
+=======================================================
+Supported crops (15): ['almond', 'banana', 'chickpea', 'citrus', 'cotton', 'fig', 'grape', 'lentil', 'maize', 'mango', 'olive', 'rice', 'sugarcane', 'tomato', 'wheat']

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart'; 
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/field.dart';
 import '../services/field_service.dart';
-import '../services/auth_service.dart';
 import '../core/theme.dart';
 
 List<Field> myFields = [];
@@ -27,11 +28,14 @@ class _FieldsPageState extends State<FieldsPage> {
   @override
   void initState() {
     super.initState();
-    _loadFields();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadFields();
+    });
   }
 
   void _loadFields() async {
-    String email = AuthService.currentUserEmail ?? "test@user.com";
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    String email = authProvider.currentUserEmail ?? "test@user.com";
     final fields = await FieldService.getFields(email);
     
     if (mounted) {
@@ -112,7 +116,8 @@ class _FieldsPageState extends State<FieldsPage> {
   }
 
   void _saveFieldToBackend(String name) async {
-    String email = AuthService.currentUserEmail ?? "test@user.com";
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    String email = authProvider.currentUserEmail ?? "test@user.com";
     
     final newField = Field(
       userEmail: email,

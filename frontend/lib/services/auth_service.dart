@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 import '../core/api_config.dart';
 
 class AuthService {
-  static String? currentUserEmail;
-  
   static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final response = await http.post(
@@ -16,7 +14,6 @@ class AuthService {
       final data = jsonDecode(response.body);
       
       if (response.statusCode == 200) {
-        currentUserEmail = email;
         return {"success": true, "data": data};
       } else {
         return {"success": false, "message": data['error'] ?? "Giriş başarısız"};
@@ -41,10 +38,33 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        currentUserEmail = email;
         return {"success": true, "data": data};
       } else {
         return {"success": false, "message": data['error'] ?? "Kayıt başarısız"};
+      }
+    } catch (e) {
+      return {"success": false, "message": "Bağlantı hatası: $e"};
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateProfile(String oldEmail, String newEmail, String fullName) async {
+    try {
+      final response = await http.put(
+        Uri.parse("${ApiConfig.baseUrl}/auth/profile"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "old_email": oldEmail,
+          "new_email": newEmail,
+          "full_name": fullName
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {"success": true, "data": data};
+      } else {
+        return {"success": false, "message": data['error'] ?? "Güncelleme başarısız"};
       }
     } catch (e) {
       return {"success": false, "message": "Bağlantı hatası: $e"};

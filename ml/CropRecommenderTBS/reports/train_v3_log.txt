@@ -1,0 +1,98 @@
+
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ΓòÉ
+ XGBOOST CROP RECOMMENDATION TRAINING
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+ Loaded 15000 samples across 15 crops
+
+ Training XGBoost on 12000 samples...
+ Quick mode: Using tuned defaults.
+
+ Evaluating on test set...
+ Test Accuracy:  0.8673
+ Test F1-Score:  0.8671
+
+ Classification Report:
+              precision    recall  f1-score   support
+
+      almond       0.78      0.76      0.77       200
+      banana       1.00      0.99      1.00       200
+    chickpea       0.78      0.78      0.78       200
+      citrus       0.99      0.99      0.99       200
+      cotton       0.87      0.86      0.86       200
+         fig       0.61      0.63      0.62       200
+       grape       0.95      0.94      0.94       200
+      lentil       0.78      0.74      0.76       200
+       maize       0.86      0.85      0.85       200
+       mango       0.97      0.98      0.98       200
+       olive       0.61      0.60      0.61       200
+        rice       0.99      0.99      0.99       200
+   sugarcane       0.99      1.00      1.00       200
+      tomato       0.95      0.96      0.96       200
+       wheat       0.88      0.93      0.90       200
+
+    accuracy                           0.87      3000
+   macro avg       0.87      0.87      0.87      3000
+weighted avg       0.87      0.87      0.87      3000
+
+ Saved xgboost_report.png
+
+ Training Complete! The realistic model is saved in models/.

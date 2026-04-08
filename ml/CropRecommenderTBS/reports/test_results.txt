@@ -1,0 +1,142 @@
+==================================================
+Test 1: Rice-like conditions
+==================================================
+{
+  "success": true,
+  "top_recommendation": "rice",
+  "confidence": 1.0,
+  "recommendations": [
+    {
+      "crop": "rice",
+      "confidence": 1.0
+    },
+    {
+      "crop": "watermelon",
+      "confidence": 0.0
+    },
+    {
+      "crop": "pomegranate",
+      "confidence": 0.0
+    }
+  ],
+  "warnings": [],
+  "input_summary": {
+    "N": 90.0,
+    "P": 42.0,
+    "K": 43.0,
+    "temperature": 20.9,
+    "humidity": 82.0,
+    "ph": 6.5,
+    "rainfall": 202.9
+  }
+}
+
+==================================================
+Test 2: Apple-like conditions
+==================================================
+{
+  "success": true,
+  "top_recommendation": "apple",
+  "confidence": 1.0,
+  "recommendations": [
+    {
+      "crop": "apple",
+      "confidence": 1.0
+    },
+    {
+      "crop": "watermelon",
+      "confidence": 0.0
+    },
+    {
+      "crop": "pomegranate",
+      "confidence": 0.0
+    }
+  ],
+  "warnings": [],
+  "input_summary": {
+    "N": 20.0,
+    "P": 130.0,
+    "K": 200.0,
+    "temperature": 22.0,
+    "humidity": 92.0,
+    "ph": 5.9,
+    "rainfall": 112.0
+  }
+}
+
+==================================================
+Test 3: Coffee-like conditions
+==================================================
+{
+  "success": true,
+  "top_recommendation": "coffee",
+  "confidence": 1.0,
+  "recommendations": [
+    {
+      "crop": "coffee",
+      "confidence": 1.0
+    },
+    {
+      "crop": "watermelon",
+      "confidence": 0.0
+    },
+    {
+      "crop": "pomegranate",
+      "confidence": 0.0
+    }
+  ],
+  "warnings": [],
+  "input_summary": {
+    "N": 100.0,
+    "P": 18.0,
+    "K": 30.0,
+    "temperature": 25.5,
+    "humidity": 58.0,
+    "ph": 6.8,
+    "rainfall": 150.0
+  }
+}
+
+==================================================
+Test 4: Out-of-range values (with warnings)
+==================================================
+{
+  "success": true,
+  "top_recommendation": "coffee",
+  "confidence": 0.365,
+  "recommendations": [
+    {
+      "crop": "coffee",
+      "confidence": 0.365
+    },
+    {
+      "crop": "cotton",
+      "confidence": 0.105
+    },
+    {
+      "crop": "kidneybeans",
+      "confidence": 0.1
+    }
+  ],
+  "warnings": [
+    "N=200.0 is outside typical range [0, 140] (Nitrogen content ratio in soil). Prediction may be unreliable.",
+    "temperature=50.0 is outside typical range [8, 44] (Average temperature in \u00b0C). Prediction may be unreliable.",
+    "humidity=10.0 is outside typical range [14, 100] (Relative humidity in %). Prediction may be unreliable.",
+    "ph=2.0 is outside typical range [3.5, 10] (Soil pH value). Prediction may be unreliable.",
+    "rainfall=500.0 is outside typical range [20, 300] (Rainfall in mm). Prediction may be unreliable."
+  ],
+  "input_summary": {
+    "N": 200.0,
+    "P": 5.0,
+    "K": 5.0,
+    "temperature": 50.0,
+    "humidity": 10.0,
+    "ph": 2.0,
+    "rainfall": 500.0
+  }
+}
+
+==================================================
+Test 5: Crop info API
+==================================================
+Supported crops (22): ['apple', 'banana', 'blackgram', 'chickpea', 'coconut', 'coffee', 'cotton', 'grapes', 'jute', 'kidneybeans', 'lentil', 'maize', 'mango', 'mothbeans', 'mungbean', 'muskmelon', 'orange', 'papaya', 'pigeonpeas', 'pomegranate', 'rice', 'watermelon']

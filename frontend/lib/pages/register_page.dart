@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -61,6 +63,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (res['success']) {
       if (mounted) {
+        Provider.of<AuthProvider>(context, listen: false).setUser(
+          email,
+          res['data']['user']?['full_name'] ?? name,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Kayıt başarılı! Giriş yapabilirsiniz."),

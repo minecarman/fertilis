@@ -78,4 +78,46 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.put("/profile", async (req, res) => {
+  try {
+    const { old_email, new_email, full_name } = req.body;
+
+    if (!old_email || !new_email || !full_name) {
+      return res.status(400).json({ error: "Tüm alanlar gereklidir." });
+    }
+
+    // Check if new email is already used by someone else
+    if (old_email !== new_email) {
+      const { data: existingUser } = await supabase
+        .from("users")
+        .select("email")
+        .eq("email", new_email)
+        .single();
+      
+      if (existingUser) {
+        return res.status(400).json({ error: "Bu e-posta başka bir hesap tarafından kullanılıyor." });
+      }
+    }
+
+    const { data: updatedUser, error } = await supabase
+      .from("users")
+      .update({ email: new_email, full_name: full_name })
+      .eq("email", old_email)
+      .select()
+      .single();
+
+    if (error || !updatedUser) {
+      console.error("Supabase Error:", error);
+      return res.status(500).json({ error: "Profil güncellenirken bir hata oluştu." });
+    }
+
+    const { password: _, ...userWithoutPassword } = updatedUser;
+    
+    res.json({ message: "Profil başarıyla güncellendi.", user: userWithoutPassword });
+  } catch (e) {
+    console.error("Profil güncelleme hatası:", e);
+    res.status(500).json({ error: "Sunucu hatası" });
+  }
+});
+
 export default router;
