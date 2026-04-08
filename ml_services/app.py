@@ -8,7 +8,6 @@ from crop_recommendation.predict_crop import CropRecommender
 
 app = FastAPI(title="Fertilis AI Microservice")
 
-# Assuming predict_crop.py exposes CropRecommender
 # Initialize model on startup
 try:
     model_path = Path(__file__).parent / "crop_recommendation" / "models" / "crop_model.pkl"
