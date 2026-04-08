@@ -1,2 +1,7 @@
 frontend/.github/copilot-instructions.md
 backend/.env
+
+# Python environment
+venv/
+.venv/
+__pycache__/
