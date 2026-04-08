@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fpdart/fpdart.dart';
 import '../core/api_config.dart';
+import '../models/irrigation_data.dart';
 
 class IrrigationService {
-  static Future<Map<String, dynamic>> analyzeRain(
+  static Future<Either<String, IrrigationData>> analyzeRain(
       double lat, double lon) async {
     try {
       final response = await http.post(
@@ -15,17 +17,14 @@ class IrrigationService {
         }),
       );
 
-      final data = jsonDecode(response.body);
-
-      return {  // veri null gelirse null yerine default gelecekler:
-        "rain": data["rain"] ?? "Bilgi yok",
-        "decision": data["decision"] ?? "Bilgi yok",
-      };
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Right(IrrigationData.fromJson(data));
+      } else {
+        return Left("Sunucu hatası: ${response.statusCode}");
+      }
     } catch (e) {
-      return {    // internette sorun olursa
-        "rain": "N/A",
-        "decision": "Bağlantı hatası",
-      };
+      return Left("Bağlantı hatası: $e");
     }
   }
 }

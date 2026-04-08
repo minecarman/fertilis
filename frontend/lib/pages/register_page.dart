@@ -57,33 +57,34 @@ class _RegisterPageState extends State<RegisterPage> {
 
     setState(() => loading = true);
 
-    final res = await AuthService.register(name, email, password);
+    final authResult = await AuthService.register(name, email, password);
 
     setState(() => loading = false);
 
-    if (res['success']) {
-      if (mounted) {
-        Provider.of<AuthProvider>(context, listen: false).setUser(
-          email,
-          res['data']['user']?['full_name'] ?? name,
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Kayıt başarılı! Giriş yapabilirsiniz."),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context);
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['message'] ?? "Kayıt başarısız"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    if (mounted) {
+      authResult.fold(
+        (errorMessage) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        (user) {
+          Provider.of<AuthProvider>(context, listen: false).setUser(
+            user.email.isNotEmpty ? user.email : email,
+            user.fullName.isNotEmpty ? user.fullName : name,
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Kayıt başarılı! Giriş yapabilirsiniz."),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        },
+      );
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/weather_service.dart';
+import '../models/weather.dart';
 import '../models/field.dart';
 
 class WeatherPage extends StatefulWidget {
@@ -13,7 +14,8 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage> {
   bool loading = false;
-  Map<String, dynamic>? weatherData;
+  Weather? weatherData;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -26,17 +28,30 @@ class _WeatherPageState extends State<WeatherPage> {
     setState(() {
       loading = true;
       weatherData = null;
+      errorMessage = null;
     });
 
-    final data = await WeatherService.getWeather(
+    final dataResult = await WeatherService.getWeather(
       widget.field.center.latitude,
       widget.field.center.longitude,
     );
 
-    setState(() {
-      weatherData = data;
-      loading = false;
-    });
+    if (mounted) {
+      dataResult.fold(
+        (error) {
+          setState(() {
+            loading = false;
+            errorMessage = error;
+          });
+        },
+        (data) {
+          setState(() {
+            weatherData = data;
+            loading = false;
+          });
+        }
+      );
+    }
   }
 
   @override
@@ -71,6 +86,8 @@ class _WeatherPageState extends State<WeatherPage> {
 
           if (loading)
             const CircularProgressIndicator()
+          else if (errorMessage != null)
+             Text(errorMessage!, style: const TextStyle(color: Colors.red))
           else if (weatherData != null)
             _buildWeatherInfo()
           else
@@ -84,26 +101,26 @@ class _WeatherPageState extends State<WeatherPage> {
     return Column(
       children: [
         Text(
-          weatherData!['city'] ?? "Bilinmeyen Konum",
+          weatherData!.city,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         
         const SizedBox(height: 10),
 
         Image.network(
-          "https://openweathermap.org/img/wn/${weatherData!['icon']}@4x.png",
+          "https://openweathermap.org/img/wn/${weatherData!.icon}@4x.png",
           width: 120,
           height: 120,
           errorBuilder: (context, error, stackTrace) => const Icon(Icons.wb_sunny, size: 80, color: Colors.orange),
         ),
 
         Text(
-          "${weatherData!['temp']}°C",
+          "${weatherData!.temp}°C",
           style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold, color: Colors.blueAccent),
         ),
         
         Text(
-          weatherData!['description'].toString().toUpperCase(),
+          weatherData!.description.toUpperCase(),
           style: const TextStyle(fontSize: 16, letterSpacing: 1.2, fontWeight: FontWeight.w600),
         ),
 
@@ -119,9 +136,9 @@ class _WeatherPageState extends State<WeatherPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _detailItem(Icons.water_drop, "${weatherData!['humidity']}%", "Nem"),
+              _detailItem(Icons.water_drop, "${weatherData!.humidity}%", "Nem"),
               Container(height: 40, width: 1, color: Colors.blue.shade200),
-              _detailItem(Icons.air, "${weatherData!['wind']} km/s", "Rüzgar"),
+              _detailItem(Icons.air, "${weatherData!.wind} km/s", "Rüzgar"),
             ],
           ),
         ),

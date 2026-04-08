@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fpdart/fpdart.dart';
 import '../core/api_config.dart';
 
 class ChatService {
-  static Future<String> sendMessage(String message) async {
+  static Future<Either<String, String>> sendMessage(String message) async {
     try {
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/chat"),
@@ -13,12 +14,12 @@ class ChatService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data["reply"] ?? "Cevap yok";
+        return Right(data["reply"]?.toString() ?? "Cevap yok");
       } else {
-        return "Server error (${response.statusCode})";
+        return Left("Sunucu hatası: ${response.statusCode}");
       }
     } catch (e) {
-      return "Bağlantı hatası: $e";
+      return Left("Bağlantı hatası: $e");
     }
   }
 }

@@ -36,12 +36,19 @@ class _FieldsPageState extends State<FieldsPage> {
   void _loadFields() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     String email = authProvider.currentUserEmail ?? "test@user.com";
-    final fields = await FieldService.getFields(email);
+    final fieldsResult = await FieldService.getFields(email);
     
     if (mounted) {
-      setState(() {
-        myFields = fields;
-      });
+      fieldsResult.fold(
+        (error) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+        },
+        (fields) {
+          setState(() {
+            myFields = fields;
+          });
+        }
+      );
     }
   }
 
@@ -126,20 +133,23 @@ class _FieldsPageState extends State<FieldsPage> {
       points: List.from(_currentPoints),
     );
 
-    final success = await FieldService.saveField(newField);
+    final result = await FieldService.saveField(newField);
 
     if (!mounted) return;
 
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tarla başarıyla kaydedildi!")));
-      setState(() {
-        _isDrawing = false;
-        _currentPoints.clear();
-      });
-      _loadFields(); 
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Kayıt sırasında hata oluştu!"), backgroundColor: Colors.red));
-    }
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.red));
+      },
+      (_) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tarla başarıyla kaydedildi!")));
+        setState(() {
+          _isDrawing = false;
+          _currentPoints.clear();
+        });
+        _loadFields(); 
+      }
+    );
   }
 
   @override

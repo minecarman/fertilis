@@ -34,11 +34,14 @@ class _ChatPageState extends State<ChatPage> {
     _controller.clear();
     _scrollToBottom();
 
-    final reply = await ChatService.sendMessage(text);
+    final replyResult = await ChatService.sendMessage(text);
 
     if (mounted) {
       setState(() {
-        messages.add(ChatMessage(text: reply, isUser: false));
+        replyResult.fold(
+          (error) => messages.add(ChatMessage(text: error, isUser: false)),
+          (replyText) => messages.add(ChatMessage(text: replyText, isUser: false)),
+        );
         loading = false;
       });
       _scrollToBottom();

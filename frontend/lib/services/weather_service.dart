@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:fpdart/fpdart.dart';
 import '../core/api_config.dart';
+import '../models/weather.dart';
 
 class WeatherService {
-  static Future<Map<String, dynamic>?> getWeather(double lat, double lon) async {
+  static Future<Either<String, Weather>> getWeather(double lat, double lon) async {
     try {
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/weather"),
@@ -16,13 +18,14 @@ class WeatherService {
       );
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final data = jsonDecode(response.body);
+        return Right(Weather.fromJson(data));
       } else {
-        return null;
+        return Left("Hava durumu servisine ulaşılamadı. Durum: ${response.statusCode}");
       }
     } catch (e) {
       debugPrint("Hava durumu hatası: $e");
-      return null;
+      return Left("Bağlantı Hatası: $e");
     }
   }
 }

@@ -7,6 +7,8 @@ import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'crop_page.dart';
 import 'profile_page.dart';
+import 'package:fpdart/fpdart.dart' hide State;
+import '../models/weather.dart';
 import '../services/weather_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -331,13 +333,13 @@ class _DashboardViewState extends State<DashboardView> {
                 ),
                 const SizedBox(height: 16),
                 
-                FutureBuilder<Map<String, dynamic>?>(
+                FutureBuilder<Either<String, Weather>>(
                   future: WeatherService.getWeather(field.center.latitude, field.center.longitude),
                   builder: (context, snapshot) {
                     
                     // 1. Durum: Yükleniyor
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: SizedBox(
                           height: 20, 
                           width: 20, 
@@ -346,31 +348,35 @@ class _DashboardViewState extends State<DashboardView> {
                       );
                     }
 
-                    if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+                    if (snapshot.hasError || !snapshot.hasData) {
                       return const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: Colors.grey));
                     }
 
-                    final data = snapshot.data!;
-                    final temp = data['temp']?.toString() ?? "-";
-                    final humidity = data['humidity']?.toString() ?? "-";
-                    
-                    String desc = data['description']?.toString() ?? "-";
-                    if (desc.length > 1) {
-                      desc = desc[0].toUpperCase() + desc.substring(1);
-                    }
-                    if (desc.length > 10) { 
-                      desc = "${desc.substring(0, 10)}..."; // Çok uzunsa kes
-                    }
+                    return snapshot.data!.fold(
+                      (error) => const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: Colors.grey)),
+                      (weather) {
+                        final temp = weather.temp.toString();
+                        final humidity = weather.humidity.toString();
+                        
+                        String desc = weather.description;
+                        if (desc.length > 1) {
+                          desc = desc[0].toUpperCase() + desc.substring(1);
+                        }
+                        if (desc.length > 10) { 
+                          desc = "${desc.substring(0, 10)}..."; // Çok uzunsa kes
+                        }
 
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatItem(Icons.thermostat, "$temp°C", "Sıcaklık"),
-                        Container(height: 30, width: 1, color: Colors.grey.shade300),
-                        _buildStatItem(Icons.water_drop_outlined, "%$humidity", "Nem"),
-                        Container(height: 30, width: 1, color: Colors.grey.shade300),
-                        _buildStatItem(Icons.wb_sunny_outlined, desc, "Durum"),
-                      ],
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildStatItem(Icons.thermostat, "$temp°C", "Sıcaklık"),
+                            Container(height: 30, width: 1, color: Colors.grey.shade300),
+                            _buildStatItem(Icons.water_drop_outlined, "%$humidity", "Nem"),
+                            Container(height: 30, width: 1, color: Colors.grey.shade300),
+                            _buildStatItem(Icons.wb_sunny_outlined, desc, "Durum"),
+                          ],
+                        );
+                      },
                     );
                   },
                 ),

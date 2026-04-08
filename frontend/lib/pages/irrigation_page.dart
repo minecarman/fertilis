@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/irrigation_service.dart';
+import '../models/irrigation_data.dart';
 import '../models/field.dart';
 
 class IrrigationPage extends StatefulWidget {
@@ -13,22 +14,27 @@ class IrrigationPage extends StatefulWidget {
 
 class _IrrigationPageState extends State<IrrigationPage> {
   bool loading = false;
-  Map<String, dynamic>? result;
+  IrrigationData? resultStr;
+  String? errorStr;
 
   Future<void> analyze() async {
     setState(() {
       loading = true;
-      result = null;
+      resultStr = null;
+      errorStr = null;
     });
 
     // Artık seçili tarla kontrolüne gerek yok, widget.field doğrudan kullanılıyor
-    final data = await IrrigationService.analyzeRain(
+    final fetchResult = await IrrigationService.analyzeRain(
       widget.field.center.latitude, 
       widget.field.center.longitude
     );
 
     setState(() {
-      result = data;
+      fetchResult.fold(
+        (err) => errorStr = err,
+        (data) => resultStr = data,
+      );
       loading = false;
     });
   }
@@ -108,20 +114,21 @@ class _IrrigationPageState extends State<IrrigationPage> {
           const SizedBox(height: 20),
 
           if (loading) const CircularProgressIndicator(),
+          if (errorStr != null) Text(errorStr!, style: const TextStyle(color: Colors.red)),
           
-          if (result != null)
+          if (resultStr != null)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: result!["decision"].toString().contains("gerek yok") ? Colors.green.shade50 : Colors.orange.shade50,
+                color: resultStr!.decision.contains("gerek yok") ? Colors.green.shade50 : Colors.orange.shade50,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: result!["decision"].toString().contains("gerek yok") ? Colors.green : Colors.orange),
+                border: Border.all(color: resultStr!.decision.contains("gerek yok") ? Colors.green : Colors.orange),
               ),
               child: Column(
                 children: [
-                  Text("Tahmini Yağış: ${result!["rain"]} mm", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Tahmini Yağış: ${resultStr!.rain} mm", style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 5),
-                  Text("${result!["decision"]}", textAlign: TextAlign.center),
+                  Text(resultStr!.decision, textAlign: TextAlign.center),
                 ],
               ),
             )

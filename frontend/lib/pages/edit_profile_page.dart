@@ -39,7 +39,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
-    final result = await AuthService.updateProfile(
+    final authResult = await AuthService.updateProfile(
       authProvider.currentUserEmail!,
       _emailController.text.trim(),
       _nameController.text.trim(),
@@ -49,22 +49,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (!mounted) return;
     
-    if (result['success']) {
-      // API'den başarılı yanıt geldikten sonra state'i güncelliyoruz
-      authProvider.setUser(
-        _emailController.text.trim(),
-        _nameController.text.trim(),
-      );
+    authResult.fold(
+      (errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        );
+      },
+      (user) {
+        authProvider.setUser(
+          user.email.isNotEmpty ? user.email : _emailController.text.trim(),
+          user.fullName.isNotEmpty ? user.fullName : _nameController.text.trim(),
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profil güncellendi.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
-      );
-      Navigator.pop(context); // Artık state reactive olduğu için true dönüp setState çağırmaya gerek yok.
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message'] ?? 'Hata oluştu'), backgroundColor: Colors.red),
-      );
-    }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profil güncellendi.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
+        );
+        Navigator.pop(context);
+      }
+    );
   }
 
   @override

@@ -30,29 +30,30 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final res = await AuthService.login(email, password);
+    final authResult = await AuthService.login(email, password);
     setState(() => loading = false);
 
-    if (res['success']) {
-      if (mounted) {
-        Provider.of<AuthProvider>(context, listen: false).setUser(
-          email,
-          res['data']['user']?['full_name'],
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(res['message'] ?? "Giriş başarısız"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    if (mounted) {
+      authResult.fold(
+        (errorMessage) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
+        },
+        (user) {
+          Provider.of<AuthProvider>(context, listen: false).setUser(
+            user.email.isNotEmpty ? user.email : email,
+            user.fullName,
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomePage()),
+          );
+        },
+      );
     }
   }
 

@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fpdart/fpdart.dart';
 import '../core/api_config.dart';
+import '../models/user.dart';
 
 class AuthService {
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Either<String, User>> login(String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/auth/login"),
@@ -14,16 +16,16 @@ class AuthService {
       final data = jsonDecode(response.body);
       
       if (response.statusCode == 200) {
-        return {"success": true, "data": data};
+        return Right(User.fromJson(data['user'] ?? {}));
       } else {
-        return {"success": false, "message": data['error'] ?? "Giriş başarısız"};
+        return Left(data['error'] ?? "Giriş başarısız");
       }
     } catch (e) {
-      return {"success": false, "message": "Bağlantı hatası: $e"};
+      return Left("Bağlantı hatası: $e");
     }
   }
 
-  static Future<Map<String, dynamic>> register(String fullName, String email, String password) async {
+  static Future<Either<String, User>> register(String fullName, String email, String password) async {
     try {
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/auth/register"),
@@ -38,16 +40,19 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
-        return {"success": true, "data": data};
+        return Right(User.fromJson(data['user'] ?? {
+          'email': email,
+          'full_name': fullName,
+        }));
       } else {
-        return {"success": false, "message": data['error'] ?? "Kayıt başarısız"};
+        return Left(data['error'] ?? "Kayıt başarısız");
       }
     } catch (e) {
-      return {"success": false, "message": "Bağlantı hatası: $e"};
+      return Left("Bağlantı hatası: $e");
     }
   }
 
-  static Future<Map<String, dynamic>> updateProfile(String oldEmail, String newEmail, String fullName) async {
+  static Future<Either<String, User>> updateProfile(String oldEmail, String newEmail, String fullName) async {
     try {
       final response = await http.put(
         Uri.parse("${ApiConfig.baseUrl}/auth/profile"),
@@ -62,12 +67,12 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return {"success": true, "data": data};
+        return Right(User.fromJson(data['user'] ?? {}));
       } else {
-        return {"success": false, "message": data['error'] ?? "Güncelleme başarısız"};
+        return Left(data['error'] ?? "Güncelleme başarısız");
       }
     } catch (e) {
-      return {"success": false, "message": "Bağlantı hatası: $e"};
+      return Left("Bağlantı hatası: $e");
     }
   }
 }
