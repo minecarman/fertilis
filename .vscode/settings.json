@@ -1,7 +1,7 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:venv",
-    "python.defaultInterpreterPath": "${workspaceFolder}/ai_service/venv/Scripts/python.exe",
+    "python.defaultInterpreterPath": "${workspaceFolder}/ml_services/venv/Scripts/python.exe",
     "python.analysis.extraPaths": [
-        "${workspaceFolder}/ai_service"
+        "${workspaceFolder}/ml_services"
     ]
 }

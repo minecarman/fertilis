@@ -13,10 +13,10 @@ APIs used (all free, no key required):
   - Open Elevation: altitude
 
 Usage:
-    python collect_real_data.py
+    python generate_nasa_dataset.py
 
 Output:
-    data/real_world_crop_data.csv
+    data/master_crop_dataset.csv
 """
 
 import json

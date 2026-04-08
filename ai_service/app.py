@@ -1,20 +1,17 @@
-import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import sys
-import os
 from pathlib import Path
 
-# Add CropRecommenderTBS to path so we can import from it easily
-from CropRecommenderTBS.predict import CropRecommender
-# from IrrigatorV2.1 import DataOrchestrator # You can import your irrigator logic similarly
+# Crop recommendation domain package
+from crop_recommendation.predict_crop import CropRecommender
+# from irrigation.irrigation_engine import DataOrchestrator
 
 app = FastAPI(title="Fertilis AI Microservice")
 
-# Assuming predict.py exposes CropRecommender
+# Assuming predict_crop.py exposes CropRecommender
 # Initialize model on startup
 try:
-    model_path = Path(__file__).parent / "CropRecommenderTBS" / "models" / "crop_model.pkl"
+    model_path = Path(__file__).parent / "crop_recommendation" / "models" / "crop_model.pkl"
     recommender = CropRecommender(str(model_path))
 except Exception as e:
     recommender = None

@@ -1,0 +1,1 @@
+"""Crop recommendation domain package."""

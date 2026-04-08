@@ -4,7 +4,7 @@ Crop Recommendation — Prediction Module (v2)
 Updated for realistic FAO dataset with 9 input features.
 
 Backend usage:
-    from predict import CropRecommender
+    from predict_crop import CropRecommender
     recommender = CropRecommender("models/crop_model.pkl")
     result = recommender.predict(
         N=40, P=15, K=50, temperature=18, humidity=55,
@@ -12,8 +12,8 @@ Backend usage:
     )
 
 CLI usage:
-    python predict.py                    # Interactive mode
-    python predict.py --N 40 --P 15 ...  # Single prediction
+    python predict_crop.py                    # Interactive mode
+    python predict_crop.py --N 40 --P 15 ...  # Single prediction
 """
 
 import json
@@ -52,7 +52,7 @@ class CropRecommender:
             model_path = Path(model_path)
 
         if not model_path.exists():
-            raise FileNotFoundError(f"Model not found at {model_path}. Run train.py first.")
+            raise FileNotFoundError(f"Model not found at {model_path}. Run train_model.py first.")
 
         package = joblib.load(model_path)
         self.model = package["model"]

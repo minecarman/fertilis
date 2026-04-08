@@ -5,8 +5,8 @@ Production-quality ML pipeline focusing purely on an optimized XGBoost model
 for the realistic (noisy/overlapping) Mediterranean & Global crop dataset.
 
 Usage:
-    python train.py                  # Full training pipeline
-    python train.py --quick          # Quick mode (skip hyperparameter tuning)
+    python train_model.py                  # Full training pipeline
+    python train_model.py --quick          # Quick mode (skip hyperparameter tuning)
 
 Output:
     models/crop_model.pkl            # Trained model pipeline
@@ -64,7 +64,7 @@ CV_FOLDS = 5
 
 def load_data() -> pd.DataFrame:
     if not DATA_FILE.exists():
-        print(f" Dataset not found at {DATA_FILE}. Run 'python FAOSimulated.py'.")
+        print(f" Dataset not found at {DATA_FILE}. Run 'python generate_fao_simulated_data.py'.")
         sys.exit(1)
 
     df = pd.read_csv(DATA_FILE)

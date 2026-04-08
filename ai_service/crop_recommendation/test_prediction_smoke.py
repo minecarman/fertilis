@@ -1,5 +1,5 @@
 """Quick test of prediction module v2."""
-from predict import CropRecommender
+from predict_crop import CropRecommender
 import json
 
 recommender = CropRecommender()
