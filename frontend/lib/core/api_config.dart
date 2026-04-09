@@ -1,4 +1,6 @@
 class ApiConfig {
-  static const String baseUrl = "http://localhost:3000"; // web için bu satırı kullan
- // static const String baseUrl = "http://172.20.10.7:3000"; // android için bu satırı kullan
+  static const String baseUrl = String.fromEnvironment(
+    "API_BASE_URL",
+    defaultValue: "http://10.0.2.2:3000",
+  );
 }

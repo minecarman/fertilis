@@ -24,9 +24,15 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/fields", fieldRoutes);
 app.use("/api/v1/recommendations", recommendationRoutes);
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 // Global Error Handler Middleware
 app.use(errorHandler);
 
-app.listen(3000, "0.0.0.0", () => {
-  console.log("Server running on port 3000");
+const port = process.env.PORT || 3000;
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`Server running on port ${port}`);
 });
