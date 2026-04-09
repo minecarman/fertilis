@@ -165,7 +165,12 @@ class _FieldsPageState extends State<FieldsPage> {
               onTap: _handleTap,
             ),
             children: [
-              TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+              TileLayer(
+                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
+                userAgentPackageName: 'com.fertilis.frontend',
+                maxZoom: 20,
+              ),
               
               PolygonLayer(
                 polygons: myFields.map((field) {

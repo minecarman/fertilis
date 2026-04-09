@@ -9,9 +9,10 @@ export const sendMessage = asyncHandler(async (req, res, next) => {
     return next(new AppError("Message is required", 400));
   }
 
-  const response = await chatService.fetchChatCompletion(message);
-  const data = await response.json();
-
-  const reply = data.choices?.[0]?.message?.content || "Cevap alınamadı";
-  res.json({ reply });
+  try {
+    const reply = await chatService.fetchChatCompletion(message);
+    res.json({ reply });
+  } catch (error) {
+    return next(new AppError(`Chat servisi hatasi: ${error.message}`, 502));
+  }
 });
