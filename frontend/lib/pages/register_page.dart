@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
+import '../core/theme.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Lütfen tüm alanları doldurun."),
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.errorClay,
         ),
       );
       return;
@@ -39,7 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Lütfen geçerli bir e-posta adresi girin."),
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.errorClay,
         ),
       );
       return;
@@ -50,7 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Şifre en az 6 karakter olmalıdır."),
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.errorClay,
         ),
       );
       return;
@@ -68,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.errorClay,
             ),
           );
         },
@@ -80,7 +81,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Kayıt başarılı! Giriş yapabilirsiniz."),
-              backgroundColor: Colors.green,
+              backgroundColor: AppTheme.mossGreen,
             ),
           );
           if (context.canPop()) {
@@ -104,7 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
             image: const AssetImage("assets/images/background.png"),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withValues(alpha: 0.3),
+              AppTheme.darkGreen.withValues(alpha: 0.28),
               BlendMode.darken,
             ),
           ),
@@ -116,12 +117,12 @@ class _RegisterPageState extends State<RegisterPage> {
               constraints: const BoxConstraints(maxWidth: 380),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 201, 232, 165),
+                  color: AppTheme.surfaceMoss,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: AppTheme.surfaceOlive, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: AppTheme.darkGreen.withValues(alpha: 0.25),
                       blurRadius: 25,
                       offset: const Offset(0, 10),
                     ),
@@ -131,14 +132,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.eco, size: 60, color: Color(0xFF2E7D32)),
+                    const Icon(Icons.eco, size: 60, color: AppTheme.wikilocGreen),
                     const SizedBox(height: 10),
                     const Text(
                       "FERTILIS",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1B5E20),
+                        color: AppTheme.darkGreen,
                         letterSpacing: 3,
                       ),
                     ),
@@ -147,18 +148,18 @@ class _RegisterPageState extends State<RegisterPage> {
                       "Aramıza Katılın",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF388E3C),
+                        color: AppTheme.textGrey,
                       ),
                     ),
                     const SizedBox(height: 30),
 
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppTheme.surfaceOlive,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: AppTheme.darkGreen.withValues(alpha: 0.08),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -171,10 +172,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             controller: _nameController,
                             textCapitalization: TextCapitalization.words,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.person_outline, color: Colors.grey),
+                              prefixIcon: const Icon(Icons.person_outline, color: AppTheme.textGrey),
                               hintText: "Ad Soyad",
                               filled: true,
-                              fillColor: Colors.grey[100],
+                              fillColor: AppTheme.backgroundGrey,
                               contentPadding: const EdgeInsets.symmetric(vertical: 16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -188,10 +189,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                              prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textGrey),
                               hintText: "E-Posta",
                               filled: true,
-                              fillColor: Colors.grey[100],
+                              fillColor: AppTheme.backgroundGrey,
                               contentPadding: const EdgeInsets.symmetric(vertical: 16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -205,10 +206,10 @@ class _RegisterPageState extends State<RegisterPage> {
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                              prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textGrey),
                               hintText: "Şifre",
                               filled: true,
-                              fillColor: Colors.grey[100],
+                              fillColor: AppTheme.backgroundGrey,
                               contentPadding: const EdgeInsets.symmetric(vertical: 16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -224,8 +225,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             child: ElevatedButton(
                               onPressed: loading ? null : _register,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2E7D32),
-                                foregroundColor: Colors.white,
+                                backgroundColor: AppTheme.wikilocGreen,
+                                foregroundColor: AppTheme.backgroundGrey,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -236,7 +237,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       width: 24,
                                       height: 24,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2, color: Colors.white),
+                                        strokeWidth: 2, color: AppTheme.backgroundGrey),
                                     )
                                   : const Text(
                                       "KAYIT OL",
@@ -258,7 +259,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       children: [
                         const Text(
                           "Zaten hesabın var mı?",
-                          style: TextStyle(color: Color(0xFF33691E)),
+                          style: TextStyle(color: AppTheme.textGrey),
                         ),
                         TextButton(
                           onPressed: () {
@@ -271,10 +272,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: const Text(
                             "Giriş Yap",
                             style: TextStyle(
-                              color: Color(0xFF2E7D32),
+                              color: AppTheme.darkGreen,
                               fontWeight: FontWeight.bold,
                               decoration: TextDecoration.underline,
-                              decorationColor: Color(0xFF2E7D32),
+                              decorationColor: AppTheme.darkGreen,
                             ),
                           ),
                         ),

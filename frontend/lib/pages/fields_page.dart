@@ -139,7 +139,7 @@ class _FieldsPageState extends State<FieldsPage> {
 
     result.fold(
       (error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: AppTheme.errorClay));
       },
       (_) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tarla başarıyla kaydedildi!")));
@@ -180,7 +180,7 @@ class _FieldsPageState extends State<FieldsPage> {
                     borderColor: AppTheme.darkGreen, 
                     borderStrokeWidth: 2,
                     label: field.name,
-                    labelStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    labelStyle: const TextStyle(color: AppTheme.textBlack, fontWeight: FontWeight.bold),
                   );
                 }).toList(),
               ),
@@ -190,8 +190,8 @@ class _FieldsPageState extends State<FieldsPage> {
                   polygons: [
                     Polygon(
                       points: _currentPoints,
-                      color: Colors.blue.withValues(alpha: 0.3),
-                      borderColor: Colors.blue,
+                      color: AppTheme.mossGreen.withValues(alpha: 0.35),
+                      borderColor: AppTheme.mossGreen,
                       borderStrokeWidth: 2,
                     ),
                   ],
@@ -206,9 +206,9 @@ class _FieldsPageState extends State<FieldsPage> {
                       height: 15,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppTheme.backgroundGrey,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.blue, width: 2),
+                          border: Border.all(color: AppTheme.mossGreen, width: 2),
                         ),
                       ),
                     );
@@ -224,15 +224,15 @@ class _FieldsPageState extends State<FieldsPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.black87,
+                  color: AppTheme.darkGreen,
                   borderRadius: BorderRadius.circular(30),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
+                  boxShadow: [BoxShadow(color: AppTheme.darkGreen.withValues(alpha: 0.35), blurRadius: 10)],
                 ),
                 child: Text(
                   _currentPoints.isEmpty 
                       ? "Haritaya dokunarak sınırları belirle" 
                       : "${_currentPoints.length} nokta eklendi",
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: AppTheme.backgroundGrey, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -243,10 +243,10 @@ class _FieldsPageState extends State<FieldsPage> {
             right: 20,
             child: FloatingActionButton(
               heroTag: "gps_btn",
-              backgroundColor: Colors.white,
+              backgroundColor: AppTheme.surfaceOlive,
               mini: true,
               onPressed: _moveToCurrentLocation,
-              child: const Icon(Icons.my_location, color: Colors.black87),
+              child: const Icon(Icons.my_location, color: AppTheme.textBlack),
             ),
           ),
 
@@ -263,8 +263,8 @@ class _FieldsPageState extends State<FieldsPage> {
                     onPressed: () => setState(() { _isDrawing = false; _currentPoints.clear(); }),
                     label: const Text("İptal"),
                     icon: const Icon(Icons.close),
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.red,
+                    backgroundColor: AppTheme.surfaceOlive,
+                    foregroundColor: AppTheme.errorClay,
                   ),
                   const SizedBox(width: 16),
                   FloatingActionButton.extended(
@@ -273,7 +273,7 @@ class _FieldsPageState extends State<FieldsPage> {
                     label: const Text("Bitir"),
                     icon: const Icon(Icons.check),
                     backgroundColor: AppTheme.wikilocGreen, 
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.backgroundGrey,
                   ),
                 ] else ...[
                   FloatingActionButton.extended(
@@ -281,7 +281,7 @@ class _FieldsPageState extends State<FieldsPage> {
                     onPressed: () => setState(() { _isDrawing = true; _currentPoints.clear(); }),
                     label: const Text("Yeni Tarla Çiz"),
                     icon: const Icon(Icons.add_location_alt_outlined),
-                    backgroundColor: Colors.white,
+                    backgroundColor: AppTheme.surfaceOlive,
                     foregroundColor: AppTheme.wikilocGreen,
                   ),
                 ],

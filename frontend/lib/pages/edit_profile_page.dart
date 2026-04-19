@@ -53,7 +53,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     authResult.fold(
       (errorMessage) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+          SnackBar(content: Text(errorMessage), backgroundColor: AppTheme.errorClay),
         );
       },
       (user) {
@@ -63,7 +63,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Profil güncellendi.", style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
+          const SnackBar(content: Text("Profil güncellendi.", style: TextStyle(color: AppTheme.backgroundGrey)), backgroundColor: AppTheme.mossGreen),
         );
         
         if (context.canPop()) {
@@ -81,7 +81,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
         title: const Text("Profili Düzenle", style: TextStyle(fontWeight: FontWeight.w800)),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,
       ),
@@ -99,7 +99,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 decoration: InputDecoration(
                   hintText: "Adınızı girin",
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppTheme.surfaceOlive,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   prefixIcon: const Icon(Icons.person_outline, color: AppTheme.wikilocGreen),
                 ),
@@ -115,7 +115,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 decoration: InputDecoration(
                   hintText: "E-posta adresiniz",
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppTheme.surfaceOlive,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.wikilocGreen),
                 ),
@@ -134,11 +134,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   onPressed: _isLoading ? null : _saveProfile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.wikilocGreen,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.backgroundGrey,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isLoading 
-                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: AppTheme.backgroundGrey, strokeWidth: 2))
                     : const Text("Kaydet", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),

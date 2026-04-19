@@ -70,9 +70,9 @@ class _ChatPageState extends State<ChatPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surfaceOlive,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: const Offset(0, 2))
+                  BoxShadow(color: AppTheme.darkGreen.withValues(alpha: 0.08), blurRadius: 5, offset: const Offset(0, 2))
                 ],
               ),
               child: Row(
@@ -86,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("Fertilis AI", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text("Llama 3.3 • Çevrimiçi", style: TextStyle(color: Colors.green, fontSize: 12)),
+                      Text("Llama 3.3 • Çevrimiçi", style: TextStyle(color: AppTheme.mossGreen, fontSize: 12)),
                     ],
                   ),
                 ],
@@ -111,7 +111,7 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     const SizedBox(width: 10, height: 10, child: CircularProgressIndicator(strokeWidth: 2)),
                     const SizedBox(width: 8),
-                    Text("Asistan düşünüyor...", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                    const Text("Asistan düşünüyor...", style: TextStyle(color: AppTheme.textGrey, fontSize: 12)),
                   ],
                 ),
               ),
@@ -119,8 +119,8 @@ class _ChatPageState extends State<ChatPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.black12)),
+                color: AppTheme.surfaceOlive,
+                border: Border(top: BorderSide(color: AppTheme.surfaceMoss)),
               ),
               child: Row(
                 children: [
@@ -145,7 +145,7 @@ class _ChatPageState extends State<ChatPage> {
                   CircleAvatar(
                     backgroundColor: AppTheme.wikilocGreen,
                     child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                      icon: const Icon(Icons.send, color: AppTheme.backgroundGrey, size: 20),
                       onPressed: sendMessage,
                     ),
                   ),
@@ -166,7 +166,7 @@ class _ChatPageState extends State<ChatPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: msg.isUser ? AppTheme.wikilocGreen : Colors.white,
+          color: msg.isUser ? AppTheme.wikilocGreen : AppTheme.surfaceOlive,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -175,13 +175,13 @@ class _ChatPageState extends State<ChatPage> {
           ),
           boxShadow: [
             if (!msg.isUser)
-              BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: const Offset(0, 2))
+              BoxShadow(color: AppTheme.darkGreen.withValues(alpha: 0.08), blurRadius: 5, offset: const Offset(0, 2))
           ],
         ),
         child: Text(
           msg.text,
           style: TextStyle(
-            color: msg.isUser ? Colors.white : AppTheme.textBlack,
+            color: msg.isUser ? AppTheme.backgroundGrey : AppTheme.textBlack,
             fontSize: 15,
             height: 1.4,
           ),

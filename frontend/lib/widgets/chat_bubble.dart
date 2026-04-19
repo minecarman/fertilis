@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
+import '../core/theme.dart';
 
 class ChatBubble extends StatelessWidget {
   final Message message;
@@ -16,11 +17,16 @@ class ChatBubble extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: message.isUser
-              ? Colors.green[300]
-              : Colors.grey[300],
+              ? AppTheme.mossGreen
+              : AppTheme.surfaceMoss,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(message.text),
+        child: Text(
+          message.text,
+          style: TextStyle(
+            color: message.isUser ? AppTheme.backgroundGrey : AppTheme.textBlack,
+          ),
+        ),
       ),
     );
   }

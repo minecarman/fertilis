@@ -35,14 +35,14 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppTheme.darkGreen.withValues(alpha: 0.08),
               blurRadius: 10,
               offset: const Offset(0, -5),
             )
           ],
         ),
         child: NavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppTheme.surfaceOlive,
           elevation: 0,
           selectedIndex: _currentIndex,
           onDestinationSelected: (index) => setState(() => _currentIndex = index),
@@ -94,7 +94,7 @@ class _DashboardViewState extends State<DashboardView> {
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
         title: const Text("Fertilis", style: TextStyle(fontWeight: FontWeight.w800)),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,
         actions: [
@@ -133,9 +133,9 @@ class _DashboardViewState extends State<DashboardView> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surfaceOlive,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: AppTheme.surfaceMoss),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<Field>(
@@ -169,7 +169,7 @@ class _DashboardViewState extends State<DashboardView> {
           children: [
             _buildActionCard(
               icon: Icons.water_drop,
-              color: Colors.blue,
+              color: AppTheme.mossGreen,
               title: "Sulama Analizi",
               onTap: () {
                 if (activeField != null) {
@@ -181,7 +181,7 @@ class _DashboardViewState extends State<DashboardView> {
             ),
             _buildActionCard(
               icon: Icons.grass,
-              color: Colors.green,
+              color: AppTheme.wikilocGreen,
               title: "Ekin Önerisi",
               onTap: () {
                 if (activeField != null) {
@@ -193,7 +193,7 @@ class _DashboardViewState extends State<DashboardView> {
             ),
             _buildActionCard(
               icon: Icons.cloud,
-              color: Colors.orange,
+              color: AppTheme.darkKhaki,
               title: "Hava Durumu",
               onTap: () {
                 if (activeField != null) {
@@ -205,7 +205,7 @@ class _DashboardViewState extends State<DashboardView> {
             ),
              _buildActionCard(
               icon: Icons.currency_lira,
-              color: Colors.purple,
+              color: AppTheme.darkGreen,
               title: "Kazanç Hesapla",
               onTap: () {},
             ),
@@ -224,7 +224,7 @@ class _DashboardViewState extends State<DashboardView> {
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85, 
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceOlive,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -234,7 +234,7 @@ class _DashboardViewState extends State<DashboardView> {
                 margin: const EdgeInsets.only(top: 12, bottom: 8),
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: AppTheme.surfaceMoss, borderRadius: BorderRadius.circular(2)),
               ),
             ),
             
@@ -245,7 +245,7 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.grey),
+                    icon: const Icon(Icons.close, color: AppTheme.textGrey),
                     onPressed: () {
                       if (context.canPop()) {
                         context.pop();
@@ -274,11 +274,11 @@ class _DashboardViewState extends State<DashboardView> {
   Widget _buildMainFieldCard(Field field) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceOlive,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppTheme.darkGreen.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           )
@@ -299,12 +299,12 @@ class _DashboardViewState extends State<DashboardView> {
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
-                    return Container(height: 160, color: Colors.grey.shade100);
+                    return Container(height: 160, color: AppTheme.surfaceMoss);
                   },
                   errorBuilder: (c, e, s) => Container(
                     height: 160, 
                     color: AppTheme.wikilocGreen.withValues(alpha: 0.1),
-                    child: const Center(child: Icon(Icons.landscape, size: 40, color: Colors.grey)),
+                    child: const Center(child: Icon(Icons.landscape, size: 40, color: AppTheme.textGrey)),
                   ),
                 ),
               ),
@@ -312,12 +312,12 @@ class _DashboardViewState extends State<DashboardView> {
                 top: 12, left: 12,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(20)),
+                  decoration: BoxDecoration(color: AppTheme.darkGreen.withValues(alpha: 0.75), borderRadius: BorderRadius.circular(20)),
                   child: const Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.white, size: 14),
+                      Icon(Icons.location_on, color: AppTheme.backgroundGrey, size: 14),
                       SizedBox(width: 4),
-                      Text("Konum Kayıtlı", style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                      Text("Konum Kayıtlı", style: TextStyle(color: AppTheme.backgroundGrey, fontSize: 12, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -334,7 +334,7 @@ class _DashboardViewState extends State<DashboardView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(field.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
-                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textGrey),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -355,11 +355,11 @@ class _DashboardViewState extends State<DashboardView> {
                     }
 
                     if (snapshot.hasError || !snapshot.hasData) {
-                      return const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: Colors.grey));
+                      return const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: AppTheme.textGrey));
                     }
 
                     return snapshot.data!.fold(
-                      (error) => const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: Colors.grey)),
+                      (error) => const Text("Hava durumu verisi alınamadı.", style: TextStyle(color: AppTheme.textGrey)),
                       (weather) {
                         final temp = weather.temp.toString();
                         final humidity = weather.humidity.toString();
@@ -376,9 +376,9 @@ class _DashboardViewState extends State<DashboardView> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _buildStatItem(Icons.thermostat, "$temp°C", "Sıcaklık"),
-                            Container(height: 30, width: 1, color: Colors.grey.shade300),
+                            Container(height: 30, width: 1, color: AppTheme.surfaceMoss),
                             _buildStatItem(Icons.water_drop_outlined, "%$humidity", "Nem"),
-                            Container(height: 30, width: 1, color: Colors.grey.shade300),
+                            Container(height: 30, width: 1, color: AppTheme.surfaceMoss),
                             _buildStatItem(Icons.wb_sunny_outlined, desc, "Durum"),
                           ],
                         );
@@ -400,10 +400,10 @@ class _DashboardViewState extends State<DashboardView> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceOlive,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
-          border: Border.all(color: Colors.grey.shade100),
+          boxShadow: [BoxShadow(color: AppTheme.darkGreen.withValues(alpha: 0.08), blurRadius: 10)],
+          border: Border.all(color: AppTheme.surfaceMoss),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,16 +448,16 @@ class _DashboardViewState extends State<DashboardView> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surfaceOlive,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppTheme.darkGreen.withValues(alpha: 0.08),
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   )
                 ],
-                border: Border.all(color: Colors.grey.shade100),
+                border: Border.all(color: AppTheme.surfaceMoss),
               ),
               child: Column(
                 children: [

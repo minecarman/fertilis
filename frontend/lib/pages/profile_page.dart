@@ -20,7 +20,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
         title: const Text("Profil", style: TextStyle(fontWeight: FontWeight.w800)),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,
       ),
@@ -31,16 +31,16 @@ class _ProfilePageState extends State<ProfilePage> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.surfaceOlive,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppTheme.darkGreen.withValues(alpha: 0.08),
                   blurRadius: 15,
                   offset: const Offset(0, 5),
                 )
               ],
-              border: Border.all(color: Colors.grey.shade100),
+              border: Border.all(color: AppTheme.surfaceMoss),
             ),
             child: Column(
               children: [
@@ -68,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.wikilocGreen,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppTheme.backgroundGrey,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: const Text("Profili Düzenle"),
@@ -83,16 +83,16 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.surfaceOlive,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AppTheme.darkGreen.withValues(alpha: 0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 )
               ],
-              border: Border.all(color: Colors.grey.shade100),
+              border: Border.all(color: AppTheme.surfaceMoss),
             ),
             child: Column(
               children: [
@@ -105,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Provider.of<AuthProvider>(context, listen: false).logout();
                     context.goNamed('login');
                   }, 
-                  color: Colors.red
+                  color: AppTheme.errorClay
                 ),
               ],
             ),
@@ -117,9 +117,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildListTile(IconData icon, String title, VoidCallback onTap, {Color color = AppTheme.textBlack}) {
     return ListTile(
-      leading: Icon(icon, color: color == Colors.red ? Colors.red : AppTheme.wikilocGreen),
+      leading: Icon(icon, color: color == AppTheme.errorClay ? AppTheme.errorClay : AppTheme.wikilocGreen),
       title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textGrey),
       onTap: onTap,
     );
   }

@@ -66,14 +66,14 @@ class _WeatherPageState extends State<WeatherPage> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.surfaceOlive,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: AppTheme.surfaceMoss),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.map, color: Colors.blueGrey, size: 20),
+                const Icon(Icons.map, color: AppTheme.textGrey, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   "${widget.field.name} Havası", 
@@ -88,11 +88,11 @@ class _WeatherPageState extends State<WeatherPage> {
           if (loading)
             const CircularProgressIndicator()
           else if (errorMessage != null)
-             Text(errorMessage!, style: const TextStyle(color: Colors.red))
+             Text(errorMessage!, style: const TextStyle(color: AppTheme.errorClay))
           else if (forecastData != null && forecastData!.isNotEmpty)
             _buildWeatherInfo()
           else
-             const Text("Hava durumu bilgisi alınamadı.", style: TextStyle(color: Colors.red)),
+             const Text("Hava durumu bilgisi alınamadı.", style: TextStyle(color: AppTheme.errorClay)),
         ],
       ),
     );
@@ -113,7 +113,7 @@ class _WeatherPageState extends State<WeatherPage> {
     }).toList();
 
     if (validForecasts.isEmpty) {
-      return const Text("Hava durumu verisi bulunmuyor.", style: TextStyle(color: Colors.grey));
+      return const Text("Hava durumu verisi bulunmuyor.", style: TextStyle(color: AppTheme.textGrey));
     }
 
     return Column(
@@ -132,11 +132,11 @@ class _WeatherPageState extends State<WeatherPage> {
               margin: const EdgeInsets.symmetric(vertical: 8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
-              color: Colors.white,
+              color: AppTheme.surfaceOlive,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: AppTheme.surfaceMoss),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                 child: Row(
@@ -194,37 +194,37 @@ class _WeatherPageState extends State<WeatherPage> {
     switch (prefix) {
       case '01': // clear sky
         iconData = Icons.wb_sunny;
-        iconColor = Colors.orange;
+        iconColor = AppTheme.darkKhaki;
         break;
       case '02': // few clouds
         iconData = Icons.wb_cloudy_outlined;
-        iconColor = Colors.amber;
+        iconColor = AppTheme.darkKhaki;
         break;
       case '03': // scattered clouds
       case '04': // broken clouds
         iconData = Icons.cloud_outlined;
-        iconColor = Colors.blueGrey;
+        iconColor = AppTheme.textGrey;
         break;
       case '09': // shower rain
       case '10': // rain
         iconData = Icons.water_drop;
-        iconColor = Colors.blue;
+        iconColor = AppTheme.mossGreen;
         break;
       case '11': // thunderstorm
         iconData = Icons.flash_on;
-        iconColor = Colors.deepPurple;
+        iconColor = AppTheme.darkGreen;
         break;
       case '13': // snow
         iconData = Icons.ac_unit;
-        iconColor = Colors.lightBlue;
+        iconColor = AppTheme.surfaceMoss;
         break;
       case '50': // mist
         iconData = Icons.waves;
-        iconColor = Colors.grey;
+        iconColor = AppTheme.textGrey;
         break;
       default:
         iconData = Icons.cloud;
-        iconColor = Colors.blueGrey;
+        iconColor = AppTheme.textGrey;
     }
 
     return Container(

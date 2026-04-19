@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
+import '../core/theme.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -38,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.errorClay,
             ),
           );
         },
@@ -72,12 +73,12 @@ class _LoginPageState extends State<LoginPage> {
               constraints: const BoxConstraints(maxWidth: 380),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 201, 232, 165), 
+                  color: AppTheme.surfaceMoss,
                   borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: AppTheme.surfaceOlive, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: AppTheme.darkGreen.withValues(alpha: 0.25),
                       blurRadius: 25,
                       offset: const Offset(0, 10),
                     ),
@@ -87,14 +88,14 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.eco, size: 60, color: Color(0xFF2E7D32)), 
+                    const Icon(Icons.eco, size: 60, color: AppTheme.wikilocGreen),
                     const SizedBox(height: 10),
                     const Text(
                       "FERTILIS",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1B5E20), 
+                        color: AppTheme.darkGreen,
                         letterSpacing: 3,
                       ),
                     ),
@@ -103,18 +104,18 @@ class _LoginPageState extends State<LoginPage> {
                       "Akıllı Tarım Asistanı",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF388E3C),
+                        color: AppTheme.textGrey,
                       ),
                     ),
                     const SizedBox(height: 30),
 
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppTheme.surfaceOlive,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: AppTheme.darkGreen.withValues(alpha: 0.08),
                             blurRadius: 10,
                             offset: const Offset(0, 5),
                           ),
@@ -127,10 +128,10 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                              prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.textGrey),
                               hintText: "E-Posta",
                               filled: true,
-                              fillColor: Colors.grey[100],
+                              fillColor: AppTheme.backgroundGrey,
                               contentPadding: const EdgeInsets.symmetric(vertical: 16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -144,10 +145,10 @@ class _LoginPageState extends State<LoginPage> {
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                              prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.textGrey),
                               hintText: "Şifre",
                               filled: true,
-                              fillColor: Colors.grey[100],
+                              fillColor: AppTheme.backgroundGrey,
                               contentPadding: const EdgeInsets.symmetric(vertical: 16),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -163,8 +164,8 @@ class _LoginPageState extends State<LoginPage> {
                             child: ElevatedButton(
                               onPressed: loading ? null : _login,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2E7D32),
-                                foregroundColor: Colors.white,
+                                backgroundColor: AppTheme.wikilocGreen,
+                                foregroundColor: AppTheme.backgroundGrey,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -175,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                                       width: 24,
                                       height: 24,
                                       child: CircularProgressIndicator(
-                                          strokeWidth: 2, color: Colors.white),
+                                        strokeWidth: 2, color: AppTheme.backgroundGrey),
                                     )
                                   : const Text(
                                       "GİRİŞ YAP",
@@ -197,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         const Text(
                           "Hesabın yok mu?",
-                          style: TextStyle(color: Color(0xFF33691E)), 
+                          style: TextStyle(color: AppTheme.textGrey),
                         ),
                         TextButton(
                           onPressed: () {
@@ -206,10 +207,10 @@ class _LoginPageState extends State<LoginPage> {
                           child: const Text(
                             "Hemen Kayıt Ol",
                             style: TextStyle(
-                              color: Color(0xFF2E7D32),
+                              color: AppTheme.darkGreen,
                               fontWeight: FontWeight.bold,
                               decoration: TextDecoration.underline,
-                              decorationColor: Color(0xFF2E7D32),
+                              decorationColor: AppTheme.darkGreen,
                             ),
                           ),
                         ),

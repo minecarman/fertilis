@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/recommendation_service.dart';
 import '../models/recommendation.dart';
 import '../models/field.dart';
+import '../core/theme.dart';
 
 class RecommendationPage extends StatefulWidget {
   final Field field;
@@ -48,7 +49,8 @@ class _RecommendationPageState extends State<RecommendationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.field.name} - Ürün Önerisi'),
-        backgroundColor: Colors.green[700],
+        backgroundColor: AppTheme.surfaceOlive,
+        foregroundColor: AppTheme.darkGreen,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -57,25 +59,26 @@ class _RecommendationPageState extends State<RecommendationPage> {
           children: [
             Text(
               '${widget.field.name} tarlanızın mevsime ait iklim verileri ve toprak verileri baz alınarak ürün yatkınlık analizi yapılmaktadır.',
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+              style: const TextStyle(fontSize: 16, color: AppTheme.textGrey),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
-              icon: Icon(Icons.analytics),
-              label: Text('Analizi Başlat'),
+              icon: const Icon(Icons.analytics),
+              label: const Text('Analizi Başlat'),
               onPressed: isLoading ? null : fetchRecommendations,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[600],
+                backgroundColor: AppTheme.wikilocGreen,
+                foregroundColor: AppTheme.backgroundGrey,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             if (isLoading)
-              Center(child: CircularProgressIndicator())
+              const Center(child: CircularProgressIndicator())
             else if (errorMessage.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(errorMessage, style: TextStyle(color: Colors.red)),
+                child: Text(errorMessage, style: const TextStyle(color: AppTheme.errorClay)),
               )
             else if (recommendedRecommendations.isNotEmpty)
               Expanded(
@@ -85,14 +88,14 @@ class _RecommendationPageState extends State<RecommendationPage> {
                     final crop = recommendedRecommendations[index];
                     return Card(
                       elevation: 3,
-                      margin: EdgeInsets.symmetric(vertical: 8),
+                      margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: Colors.green[100],
+                          backgroundColor: AppTheme.surfaceMoss,
                           child: Text(
                             '#${crop.rank}',
-                            style: TextStyle(
-                              color: Colors.green[800],
+                            style: const TextStyle(
+                              color: AppTheme.darkGreen,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -109,25 +112,25 @@ class _RecommendationPageState extends State<RecommendationPage> {
                           children: [
                             Text(
                               crop.description,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: AppTheme.textBlack,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               crop.plantingCalendar,
-                              style: TextStyle(
-                                color: Colors.grey[700],
+                              style: const TextStyle(
+                                color: AppTheme.textGrey,
                                 fontSize: 13,
                               ),
                             ),
                           ],
                         ),
                         isThreeLine: true,
-                        trailing: Icon(
+                        trailing: const Icon(
                           Icons.check_circle_outline,
-                          color: Colors.green,
+                          color: AppTheme.mossGreen,
                         ),
                       ),
                     );
