@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
             NavigationDestination(
               icon: Icon(Icons.dashboard_outlined),
               selectedIcon: Icon(Icons.dashboard, color: AppTheme.darkGreen),
-              label: 'Özet',
+              label: 'Ana Sayfa',
             ),
             NavigationDestination(
               icon: Icon(Icons.map_outlined),
@@ -141,7 +141,7 @@ class _DashboardViewState extends State<DashboardView> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "Şu Anki Durum",
+              "seçili Tarlanız",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
             ),
             
