@@ -1,11 +1,14 @@
 const errorHandler = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
+  const numericStatusCode = Number(err.statusCode);
+  err.statusCode = Number.isFinite(numericStatusCode) ? numericStatusCode : 500;
   err.status = err.status || 'error';
 
   // Log error (for server console)
-  if (err.statusCode === 500) {
-    console.error('ERROR 💥:', err);
-  }
+  console.error('ERROR 💥:', {
+    statusCode: err.statusCode,
+    message: err.message,
+    stack: err.stack,
+  });
 
   // Send client response
   res.status(err.statusCode).json({

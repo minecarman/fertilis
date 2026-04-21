@@ -1,8 +1,9 @@
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
-    this.statusCode = statusCode || 500;
-    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    const numericStatusCode = Number(statusCode);
+    this.statusCode = Number.isFinite(numericStatusCode) ? numericStatusCode : 500;
+    this.status = `${this.statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
 
     Error.captureStackTrace(this, this.constructor);

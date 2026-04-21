@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:go_router/go_router.dart';
 import 'package:fpdart/fpdart.dart' hide State;
 import '../models/field.dart';
@@ -80,6 +81,19 @@ class DashboardView extends StatefulWidget {
 
 class _DashboardViewState extends State<DashboardView> {
   Field? activeField;
+  Future<Either<String, Weather>>? _weatherFuture;
+  static const int _maxInlineImageChars = 1300000;
+
+  void _refreshWeatherForActiveField() {
+    if (activeField == null) {
+      _weatherFuture = null;
+      return;
+    }
+    _weatherFuture = WeatherService.getWeather(
+      activeField!.center.latitude,
+      activeField!.center.longitude,
+    );
+  }
 
   @override
   void initState() {
@@ -87,6 +101,7 @@ class _DashboardViewState extends State<DashboardView> {
     if (myFields.isNotEmpty) {
       activeField = myFields.first;
     }
+    _refreshWeatherForActiveField();
   }
 
   @override
@@ -99,7 +114,19 @@ class _DashboardViewState extends State<DashboardView> {
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
+          PopupMenuButton<int>(
+            tooltip: "Bildirimler",
+            offset: const Offset(0, 40),
+            constraints: const BoxConstraints(minWidth: 220, maxWidth: 220),
+            icon: const Icon(Icons.notifications_none),
+            itemBuilder: (context) => const [
+              PopupMenuItem<int>(
+                enabled: false,
+                value: 0,
+                child: Text("Şu anlık bildiriminiz yok."),
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
@@ -140,10 +167,7 @@ class _DashboardViewState extends State<DashboardView> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              "seçili Tarlanız",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
-            ),
+            _sectionChip("Seçili Tarlanız"),
             
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -159,7 +183,12 @@ class _DashboardViewState extends State<DashboardView> {
                   icon: const Icon(Icons.keyboard_arrow_down, color: AppTheme.wikilocGreen),
                   style: const TextStyle(color: AppTheme.textBlack, fontWeight: FontWeight.w600),
                   items: myFields.map((f) => DropdownMenuItem(value: f, child: Text(f.name))).toList(),
-                  onChanged: (val) => setState(() => activeField = val),
+                  onChanged: (val) {
+                    setState(() {
+                      activeField = val;
+                      _refreshWeatherForActiveField();
+                    });
+                  },
                 ),
               ),
             ),
@@ -171,7 +200,10 @@ class _DashboardViewState extends State<DashboardView> {
         if (activeField != null) _buildMainFieldCard(activeField!),
 
         const SizedBox(height: 24),
-        const Text("Araçlar", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _sectionChip("Araçlar"),
+        ),
         const SizedBox(height: 12),
 
         GridView.count(
@@ -236,6 +268,20 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
+  Widget _sectionChip(String title) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceOlive.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.darkGreen),
+      ),
+    );
+  }
+
 
   void _showToolModal(BuildContext context, String title, Widget childWidget) {
     showModalBottomSheet(
@@ -295,7 +341,7 @@ class _DashboardViewState extends State<DashboardView> {
   Widget _buildMainFieldCard(Field field) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surfaceOlive,
+        color: AppTheme.surfaceOlive.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -313,21 +359,7 @@ class _DashboardViewState extends State<DashboardView> {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.network(
-                  "https://picsum.photos/seed/fertilis/800/400",
-                  height: 160,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(height: 160, color: AppTheme.surfaceMoss);
-                  },
-                  errorBuilder: (c, e, s) => Container(
-                    height: 160, 
-                    color: AppTheme.wikilocGreen.withValues(alpha: 0.1),
-                    child: const Center(child: Icon(Icons.landscape, size: 40, color: AppTheme.textGrey)),
-                  ),
-                ),
+                child: _buildFieldImage(field),
               ),
               Positioned(
                 top: 12, left: 12,
@@ -343,6 +375,26 @@ class _DashboardViewState extends State<DashboardView> {
                   ),
                 ),
               ),
+              if ((field.crop ?? '').isNotEmpty)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceOlive.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      field.crop!,
+                      style: const TextStyle(
+                        color: AppTheme.darkGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
           
@@ -354,14 +406,15 @@ class _DashboardViewState extends State<DashboardView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(field.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
-                    const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textGrey),
+                    Expanded(
+                      child: Text(field.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 
                 FutureBuilder<Either<String, Weather>>(
-                  future: WeatherService.getWeather(field.center.latitude, field.center.longitude),
+                  future: _weatherFuture ?? WeatherService.getWeather(field.center.latitude, field.center.longitude),
                   builder: (context, snapshot) {
                     
                     // 1. Durum: Yükleniyor
@@ -415,6 +468,69 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
+  Widget _buildFieldImage(Field field) {
+    final image = field.imageUrl;
+
+    if (image != null && image.isNotEmpty) {
+      try {
+        if (image.startsWith('http')) {
+          return Image.network(
+            image,
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (c, e, s) => Image.asset(
+              _defaultFieldAsset(field),
+              height: 160,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          );
+        }
+
+        if (image.length > _maxInlineImageChars) {
+          return Image.asset(
+            _defaultFieldAsset(field),
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          );
+        }
+
+        final normalizedBase64 = image.contains(',') ? image.split(',').last : image;
+
+        return Image.memory(
+          base64Decode(normalizedBase64),
+          height: 160,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (c, e, s) => Image.asset(
+            _defaultFieldAsset(field),
+            height: 160,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (_) {
+        // Fallback to default image below.
+      }
+    }
+
+    return Image.asset(
+      _defaultFieldAsset(field),
+      height: 160,
+      width: double.infinity,
+      fit: BoxFit.cover,
+    );
+  }
+
+  String _defaultFieldAsset(Field field) {
+    final seed = (field.id ?? field.name).hashCode.abs();
+    return seed.isEven
+        ? 'assets/images/default_field_1.png'
+        : 'assets/images/default_field_2.png';
+  }
+
   Widget _buildActionCard({required IconData icon, required Color color, required String title, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
@@ -454,7 +570,7 @@ class _DashboardViewState extends State<DashboardView> {
         Icon(icon, color: AppTheme.wikilocGreen, size: 24),
         const SizedBox(height: 4),
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textBlack)),
-        Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.textGrey)),
+        Text(label, style: const TextStyle(fontSize: 12, color: AppTheme.darkGreen)),
       ],
     );
   }
@@ -469,7 +585,7 @@ class _DashboardViewState extends State<DashboardView> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceOlive,
+                color: AppTheme.surfaceOlive.withValues(alpha: 0.96),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -493,7 +609,7 @@ class _DashboardViewState extends State<DashboardView> {
                   const SizedBox(height: 20),
                   const Text(
                     "Hoş Geldiniz!",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.darkGreen),
                   ),
                   const SizedBox(height: 12),
                   const Text(

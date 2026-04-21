@@ -116,50 +116,37 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: const TextStyle(fontSize: 15, color: AppTheme.textGrey),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    context.pushNamed('edit-profile');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.wikilocGreen,
-                    foregroundColor: AppTheme.backgroundGrey,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text("Profili Düzenle"),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          // Ayarlar Seçenekleri
-          const Text("Ayarlar", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
-          const SizedBox(height: 12),
-          Container(
-            decoration: BoxDecoration(
-              color: AppTheme.surfaceOlive,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.darkGreen.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                )
-              ],
-              border: Border.all(color: AppTheme.surfaceMoss),
-            ),
-            child: Column(
-              children: [
-                _buildListTile(Icons.settings_outlined, "Uygulama Ayarları", () {}),
-                const Divider(height: 1, indent: 16, endIndent: 16),
-                _buildListTile(
-                  Icons.logout, 
-                  "Çıkış Yap", 
-                  () {
-                    Provider.of<AuthProvider>(context, listen: false).logout();
-                    context.goNamed('login');
-                  }, 
-                  color: AppTheme.errorClay
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.pushNamed('edit-profile');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.wikilocGreen,
+                          foregroundColor: AppTheme.backgroundGrey,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text("Profili Düzenle"),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Provider.of<AuthProvider>(context, listen: false).logout();
+                          context.goNamed('login');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.errorClay,
+                          foregroundColor: AppTheme.backgroundGrey,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text("Çıkış Yap"),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -210,15 +197,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildListTile(IconData icon, String title, VoidCallback onTap, {Color color = AppTheme.textBlack}) {
-    return ListTile(
-      leading: Icon(icon, color: color == AppTheme.errorClay ? AppTheme.errorClay : AppTheme.wikilocGreen),
-      title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppTheme.textGrey),
-      onTap: onTap,
     );
   }
 }

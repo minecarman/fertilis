@@ -7,6 +7,8 @@ class Field {
   final String name;
   final double area;
   final List<LatLng> points;
+  final String? crop;
+  final String? imageUrl;
 
   List<LatLng> get boundaries => points; 
   double get calculatedArea => calculateAreaHa(points);
@@ -48,6 +50,8 @@ class Field {
     required this.name,
     required this.area,
     required this.points,
+    this.crop,
+    this.imageUrl,
   });
 
   factory Field.fromJson(Map<String, dynamic> json) {
@@ -58,6 +62,8 @@ class Field {
       name: json['name'] ?? "Adsız",
       area: (json['area'] ?? 0).toDouble(),
       points: coords.map((p) => LatLng(p['lat'], p['lng'])).toList(),
+      crop: json['crop']?.toString(),
+      imageUrl: json['image_url']?.toString(),
     );
   }
 
@@ -67,6 +73,8 @@ class Field {
       'name': name,
       'area': area,
       'coordinates': points.map((p) => {'lat': p.latitude, 'lng': p.longitude}).toList(),
+      'crop': crop,
+      'image_url': imageUrl,
     };
   }
 }
