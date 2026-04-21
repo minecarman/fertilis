@@ -7,6 +7,7 @@ import weatherRoutes from "./routes/weather.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import fieldRoutes from "./routes/field.routes.js";
 import recommendationRoutes from './routes/recommendation.routes.js';
+import yieldRoutes from "./routes/yield.routes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -23,6 +24,7 @@ app.use("/api/v1/weather", weatherRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/fields", fieldRoutes);
 app.use("/api/v1/recommendations", recommendationRoutes);
+app.use("/api/v1/yield", yieldRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });

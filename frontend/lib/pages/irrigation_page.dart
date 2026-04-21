@@ -57,7 +57,7 @@ class _IrrigationPageState extends State<IrrigationPage> {
               children: [
                 Icon(Icons.info_outline, color: AppTheme.mossGreen),
                 SizedBox(width: 12),
-                Expanded(child: Text("FAO-56 standardına göre, tarlanızın konumundaki buharlaşma verisi hesaplanır.")),
+                Expanded(child: Text("Seçili tarlanızın su ihtiyacı hesaplanır. Yeşil = Yeterli yağış, Turuncu = Sulama gerekli.")),
               ],
             ),
           ),
@@ -121,20 +121,108 @@ class _IrrigationPageState extends State<IrrigationPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: resultStr!.decision.contains("gerek yok") ? AppTheme.surfaceMoss : AppTheme.darkKhaki.withValues(alpha: 0.25),
+                color: resultStr!.irrigationMm <= 0 ? AppTheme.surfaceMoss : Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: resultStr!.decision.contains("gerek yok") ? AppTheme.mossGreen : AppTheme.darkKhaki),
+                border: Border.all(
+                  color: resultStr!.irrigationMm <= 0 ? AppTheme.mossGreen : Colors.orange,
+                  width: 2,
+                ),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("Tahmini Yağış: ${resultStr!.rain} mm", style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 5),
-                  Text(resultStr!.decision, textAlign: TextAlign.center),
+                  // Main recommendation
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                        color: resultStr!.irrigationMm <= 0 
+                          ? Colors.green.withValues(alpha: 0.1) 
+                          : Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: resultStr!.irrigationMm <= 0 ? Colors.green : Colors.orange,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          resultStr!.irrigationMm <= 0 ? "Sulama Gerekmez" : "Sulama Gerekli",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: resultStr!.irrigationMm <= 0 ? Colors.green : Colors.orange[800],
+                          ),
+                        ),
+                        if (resultStr!.irrigationMm > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            "${resultStr!.irrigationMm.toStringAsFixed(0)} mm",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange[800],
+                            ),
+                          ),
+                        ]
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Detailed breakdown
+                  Column(
+                    children: [
+                      _detailRow("Ölçülen Yağış", "${resultStr!.rawRainMm.toStringAsFixed(1)} mm"),
+                      _detailRow("Buharlaşma (ET0)", "${resultStr!.et0Mm.toStringAsFixed(1)} mm"),
+                      _detailRow("Bitki Su Kaybı", "${resultStr!.cropWaterLossMm.toStringAsFixed(1)} mm"),
+                      _detailRow("Efektif Yağış", "${resultStr!.effectiveRainMm.toStringAsFixed(1)} mm"),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Tags
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _tag("Toprak", resultStr!.soilType),
+                      _tag("AMC", resultStr!.amc),
+                      _tag("Kaynak", resultStr!.weatherSource),
+                    ],
+                  ),
                 ],
               ),
             )
         ],
       ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _tag(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceOlive,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.surfaceMoss),
+      ),
+      child: Text("$label: $value", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 }

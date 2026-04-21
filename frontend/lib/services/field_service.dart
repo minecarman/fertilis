@@ -22,6 +22,20 @@ class FieldService {
     }
   }
 
+  static Future<Either<String, bool>> deleteField(int fieldId) async {
+    try {
+      final res = await http.delete(
+        Uri.parse("${ApiConfig.baseUrl}/api/v1/fields/$fieldId"),
+        headers: {"Content-Type": "application/json"},
+      );
+      if (res.statusCode == 200) return const Right(true);
+      return const Left("Tarla silinirken bir sunucu hatası oluştu.");
+    } catch (e) {
+      debugPrint("Silme Hatası: $e");
+      return Left("Bağlantı Hatası: $e");
+    }
+  }
+
   static Future<Either<String, List<Field>>> getFields(String email) async {
     try {
       final res = await http.get(Uri.parse("${ApiConfig.baseUrl}/api/v1/fields/$email"));

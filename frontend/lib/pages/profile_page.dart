@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
+import '../models/field.dart';
+import '../pages/fields_page.dart';
+import '../services/field_service.dart';
 import '../core/theme.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -12,6 +15,57 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  Future<void> _deleteField(Field field) async {
+    final fieldId = int.tryParse(field.id ?? "");
+    if (fieldId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tarla silinemedi. Geçersiz tarla ID.")),
+        );
+      }
+      return;
+    }
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Tarla sil"),
+        content: Text("${field.name} tarlasını silmek istediğinize emin misiniz?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("İptal"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text("Sil"),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    final result = await FieldService.deleteField(fieldId);
+    if (!mounted) return;
+
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: AppTheme.errorClay),
+        );
+      },
+      (_) {
+        setState(() {
+          myFields.removeWhere((item) => item.id == field.id);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tarla silindi.")),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -109,6 +163,50 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Tarlalarım
+          const Text("Tarlalarım", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceOlive,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.darkGreen.withValues(alpha: 0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                )
+              ],
+              border: Border.all(color: AppTheme.surfaceMoss),
+            ),
+            child: myFields.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text("Henüz kayıtlı tarla yok.", style: TextStyle(color: AppTheme.textBlack)),
+                  )
+                : Column(
+                    children: myFields.map((field) {
+                      return Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.landscape_outlined, color: AppTheme.wikilocGreen),
+                            title: Text(field.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            subtitle: Text("${field.area.toStringAsFixed(1)} ha"),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline, color: AppTheme.errorClay),
+                              onPressed: () => _deleteField(field),
+                            ),
+                          ),
+                          if (field != myFields.last)
+                            const Divider(height: 1, indent: 16, endIndent: 16),
+                        ],
+                      );
+                    }).toList(),
+                  ),
           ),
         ],
       ),

@@ -16,6 +16,20 @@ SOIL_DATABASE = {
     "Clay": 85
 }
 
+
+def _safe_last(values, default=0.0):
+    if not values:
+        return default
+    return values[-1]
+
+
+def _irrigation_decision(irrigation_mm):
+    if irrigation_mm <= 0:
+        return "Bugun sulamaya gerek yok"
+    if irrigation_mm < 2:
+        return "Az miktarda sulama yap"
+    return "Sulama gerekli"
+
 # 2. DATA ORCHESTRATOR
 class DataOrchestrator:
     def __init__(self, lat, lon):
@@ -69,19 +83,21 @@ class IrrigationEngine:
         self.base_cn = SOIL_DATABASE.get(soil_type, 80)
 
     def get_amc_condition(self, weather_data, mode):
-        if not weather_data: return "II", 0
+        if not weather_data:
+            return "II", 0.0
         
         if mode == "Hybrid" and "hourly" in weather_data:
-            latest_vwc = weather_data['hourly']['soil_moisture_0_to_10cm'][-1]
+            moisture_values = weather_data.get('hourly', {}).get('soil_moisture_0_to_10cm', [])
+            latest_vwc = _safe_last(moisture_values, 0.0)
             if latest_vwc < 0.15: return "I", latest_vwc
             if latest_vwc > 0.35: return "III", latest_vwc
             return "II", latest_vwc
         
         if "daily" in weather_data:
-            total_rain = sum(weather_data['daily']['precipitation_sum'])
+            total_rain = float(sum(weather_data.get('daily', {}).get('precipitation_sum', [])))
             if total_rain < 13: return "I", total_rain
             if total_rain > 38: return "III", total_rain
-        return "II", 0
+        return "II", 0.0
 
     def calculate_effective_rain(self, rain_mm, amc):
         if rain_mm <= 2.0: return 0.0
@@ -89,47 +105,74 @@ class IrrigationEngine:
         if amc == "I": cn = self.base_cn / (2.281 - 0.01281 * self.base_cn)
         elif amc == "III": cn = self.base_cn / (0.427 + 0.00573 * self.base_cn)
         else: cn = self.base_cn
-        
+
+        if cn <= 0 or cn >= 100:
+            cn = max(1.0, min(cn, 99.0))
+
         s = (25400 / cn) - 254
+        if s <= 0:
+            return max(0.0, rain_mm)
         ia = 0.2 * s
         if rain_mm <= ia: return rain_mm
-        return max(0, rain_mm - (((rain_mm - ia) ** 2) / (rain_mm + 0.8 * s)))
+        denominator = rain_mm + 0.8 * s
+        if denominator <= 0:
+            return max(0.0, rain_mm)
+        return max(0.0, rain_mm - (((rain_mm - ia) ** 2) / denominator))
 
-    def run_fao56_logic(self, weather_data, mode="Hybrid"):
-        # Display Fetched Data Log
-        print("\nENVIRONMENTAL DATA LOG")
-        dates = weather_data['daily'].get('time', [])
-        rains = weather_data['daily'].get('precipitation_sum', [])
-        
-        if len(rains) > 1:
-            print("5-Day Rainfall History:")
-            for d, r in zip(dates, rains):
-                print(f"  > {d}: {r} mm")
-        else:
-            print(f"  Yesterday's Rain: {rains[-1]} mm")
+    def run_fao56_logic(self, weather_data, mode="Hybrid", verbose=False):
+        daily_data = weather_data.get('daily', {}) if weather_data else {}
+        dates = daily_data.get('time', [])
+        rains = daily_data.get('precipitation_sum', [])
+        et0_values = daily_data.get('et0_fao_evapotranspiration', [])
 
-        raw_rain = rains[-1]
-        et0 = weather_data['daily']['et0_fao_evapotranspiration'][-1]
+        raw_rain = float(_safe_last(rains, 0.0))
+        et0 = float(_safe_last(et0_values, 0.0))
         amc, sensor_val = self.get_amc_condition(weather_data, mode)
-        
-        if mode == "Hybrid":
-            print(f"  Latest Soil Moisture: {sensor_val} m3/m3")
-        else:
-            print(f"  5-Day Total Rain for AMC: {sensor_val} mm")
 
         # Calculations
         eff_rain = self.calculate_effective_rain(raw_rain, amc)
         crop_water_loss = et0 * self.kc
         irrigation_needed = max(0.0, crop_water_loss - eff_rain)
 
-        print("\nAPP DASHBOARD: FAO-56 & USDA ENGINE")
-        print(f"Mode: {mode} | Soil: {self.soil_type} | AMC: {amc}")
-        print(f"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-        print(f"Reference ET0:       {round(et0, 2)} mm")
-        print(f"Effective Rain:     -{round(eff_rain, 2)} mm")
-        print(f"WATER TO DISPENSE:   {round(irrigation_needed, 2)} mm")
-        
-        return round(irrigation_needed, 2)
+        result = {
+            "mode": mode,
+            "soil_type": self.soil_type,
+            "amc": amc,
+            "amc_reference": round(float(sensor_val), 4),
+            "raw_rain_mm": round(raw_rain, 2),
+            "et0_mm": round(et0, 2),
+            "effective_rain_mm": round(eff_rain, 2),
+            "crop_water_loss_mm": round(crop_water_loss, 2),
+            "irrigation_mm": round(irrigation_needed, 2),
+            "decision": _irrigation_decision(irrigation_needed),
+            "history": {
+                "dates": dates,
+                "rains_mm": [round(float(r), 2) for r in rains],
+            },
+        }
+
+        if verbose:
+            print("\nENVIRONMENTAL DATA LOG")
+            if len(rains) > 1:
+                print("5-Day Rainfall History:")
+                for d, r in zip(dates, rains):
+                    print(f"  > {d}: {r} mm")
+            else:
+                print(f"  Yesterday's Rain: {raw_rain} mm")
+
+            if mode == "Hybrid":
+                print(f"  Latest Soil Moisture: {sensor_val} m3/m3")
+            else:
+                print(f"  5-Day Total Rain for AMC: {sensor_val} mm")
+
+            print("\nAPP DASHBOARD: FAO-56 & USDA ENGINE")
+            print(f"Mode: {mode} | Soil: {self.soil_type} | AMC: {amc}")
+            print(f"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+            print(f"Reference ET0:       {result['et0_mm']} mm")
+            print(f"Effective Rain:     -{result['effective_rain_mm']} mm")
+            print(f"WATER TO DISPENSE:   {result['irrigation_mm']} mm")
+
+        return result
 
 # 4. MAIN APP EXECUTION
 def run_app_cycle():
@@ -145,7 +188,8 @@ def run_app_cycle():
     calc_mode = "Hybrid" if "hourly" in weather_package else "Strict"
     
     engine = IrrigationEngine(crop_kc=1.15, soil_type="Clay")
-    engine.run_fao56_logic(weather_package, mode=calc_mode)
+    result = engine.run_fao56_logic(weather_package, mode=calc_mode, verbose=True)
+    print(f"Decision: {result['decision']}")
 
 if __name__ == "__main__":
     run_app_cycle()

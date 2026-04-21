@@ -8,6 +8,7 @@ import 'chat_page.dart';
 import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'recommendation_page.dart';
+import 'yield_page.dart';
 import '../models/weather.dart';
 import '../services/weather_service.dart';
 
@@ -207,7 +208,13 @@ class _DashboardViewState extends State<DashboardView> {
               icon: Icons.currency_lira,
               color: AppTheme.darkGreen,
               title: "Kazanç Hesapla",
-              onTap: () {},
+              onTap: () {
+                if (activeField != null) {
+                  _showToolModal(context, "Kazanç Tahmini", YieldPage(field: activeField!));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Lütfen önce bir tarla seçin")));
+                }
+              },
             ),
           ],
         ),

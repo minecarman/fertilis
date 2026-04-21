@@ -1,74 +1,93 @@
 import pandas as pd
-import numpy as np
 import joblib
 import argparse
 import sys
+from pathlib import Path
+
+class YieldPredictor:
+    def __init__(self, model_path, data_path):
+        model_path = Path(model_path)
+        data_path = Path(data_path)
+
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model file not found: {model_path}")
+        if not data_path.exists():
+            raise FileNotFoundError(f"Data file not found: {data_path}")
+
+        pipeline = joblib.load(model_path)
+        self.model = pipeline['model']
+        self.label_encoders = pipeline['label_encoders']
+        self.scaler = pipeline['scaler']
+        self.features = pipeline['features']
+        self.df = pd.read_csv(data_path)
+
+    def _trend_text(self, diff):
+        if diff > 0:
+            return "increase"
+        if diff < 0:
+            return "decrease"
+        return "stable"
+
+    def predict(self, country, commodity):
+        subset = self.df[(self.df['Country/Region'] == country) & (self.df['Commodity'] == commodity)]
+
+        if subset.empty:
+            raise ValueError(f"No data found for Country={country} and Commodity={commodity}.")
+
+        latest_row = subset.sort_values(by='Season').iloc[-1:]
+        latest_season = str(latest_row['Season'].values[0])
+
+        # Prepare the feature vector
+        X_pred = latest_row[self.features].copy()
+
+        # Apply encoders
+        for col, le in self.label_encoders.items():
+            X_pred[col] = le.transform(X_pred[col])
+
+        # Scale numeric features
+        numeric_cols = [c for c in self.features if c not in self.label_encoders.keys()]
+        X_pred[numeric_cols] = self.scaler.transform(X_pred[numeric_cols])
+
+        prediction = float(self.model.predict(X_pred)[0])
+        current_prod = float(latest_row['Production'].values[0]) if 'Production' in latest_row.columns else None
+        diff = prediction - current_prod if current_prod is not None else None
+
+        return {
+            "country": country,
+            "commodity": commodity,
+            "latest_season": latest_season,
+            "predicted_production_mt": round(prediction, 2),
+            "current_production_mt": round(current_prod, 2) if current_prod is not None else None,
+            "delta_mt": round(diff, 2) if diff is not None else None,
+            "trend": self._trend_text(diff) if diff is not None else None,
+        }
+
 
 def predict(model_path, data_path, country, commodity):
-    try:
-        pipeline = joblib.load(model_path)
-    except FileNotFoundError:
-        print(f"Error: Model file '{model_path}' not found. Please run train.py first.")
-        sys.exit(1)
-        
-    model = pipeline['model']
-    label_encoders = pipeline['label_encoders']
-    scaler = pipeline['scaler']
-    features = pipeline['features']
+    predictor = YieldPredictor(model_path=model_path, data_path=data_path)
+    return predictor.predict(country=country, commodity=commodity)
 
-    # Load data to find the historical context for the requested country/commodity
-    df = pd.read_csv(data_path)
-    
-    # Filter for the specific country and commodity
-    subset = df[(df['Country/Region'] == country) & (df['Commodity'] == commodity)]
-    
-    if subset.empty:
-        print(f"Error: No data found for Country={country} and Commodity={commodity}.")
-        sys.exit(1)
-        
-    # Get the latest available season to make the prediction
-    # Assuming Season is formatted like '2025/26'
-    latest_row = subset.sort_values(by='Season').iloc[-1:]
-    latest_season = latest_row['Season'].values[0]
-    
-    print(f"Using historical data from Season: {latest_season} to predict the following year.")
-    
-    # Prepare the feature vector
-    X_pred = latest_row[features].copy()
 
-    # Apply Encoders
-    for col, le in label_encoders.items():
-        try:
-            X_pred[col] = le.transform(X_pred[col])
-        except ValueError:
-            print(f"Error: Unseen label for {col}.")
-            sys.exit(1)
-            
-    # Scale numeric features
-    numeric_cols = [c for c in features if c not in label_encoders.keys()]
-    X_pred[numeric_cols] = scaler.transform(X_pred[numeric_cols])
-
-    # Predict
-    prediction = model.predict(X_pred)[0]
-    
+def _print_prediction(result):
     print("$" * 50)
-    print(f"PREDICTION RESULTS FOR {commodity.upper()} IN {country.upper()}")
+    print(f"PREDICTION RESULTS FOR {result['commodity'].upper()} IN {result['country'].upper()}")
     print("$" * 50)
-    print(f"Predicted Production for next year: {prediction:,.2f} Million tonnes")
-    
-    # Print the current year production for context
-    if 'Production' in latest_row.columns:
-        current_prod = float(latest_row['Production'].values[0])
-        print(f"Current Year ({latest_season}) Production: {current_prod:,.2f} Million tonnes")
-        diff = prediction - current_prod
-        if diff > 0:
-            print(f"Trend: ↑ Expected to increase by {diff:,.2f} Million tonnes")
-        elif diff < 0:
-            print(f"Trend: ↓ Expected to decrease by {abs(diff):,.2f} Million tonnes")
+    print(f"Using historical data from Season: {result['latest_season']} to predict the following year.")
+    print(f"Predicted Production for next year: {result['predicted_production_mt']:,.2f} Million tonnes")
+    if result['current_production_mt'] is not None:
+        print(
+            f"Current Year ({result['latest_season']}) Production: "
+            f"{result['current_production_mt']:,.2f} Million tonnes"
+        )
+        if result['delta_mt'] is not None and result['delta_mt'] > 0:
+            print(f"Trend: ↑ Expected to increase by {result['delta_mt']:,.2f} Million tonnes")
+        elif result['delta_mt'] is not None and result['delta_mt'] < 0:
+            print(f"Trend: ↓ Expected to decrease by {abs(result['delta_mt']):,.2f} Million tonnes")
         else:
             print(f"Trend: ↔ Expected to remain stable")
-            
+
     print("-" * 50)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Predict Crop Production using trained model.")
@@ -78,4 +97,9 @@ if __name__ == "__main__":
     parser.add_argument("--commodity", "-y", type=str, required=True, help="Commodity name (e.g. 'Wheat', 'Maize')")
     
     args = parser.parse_args()
-    predict(args.model, args.data, args.country, args.commodity)
+    try:
+        prediction_result = predict(args.model, args.data, args.country, args.commodity)
+        _print_prediction(prediction_result)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"Error: {exc}")
+        sys.exit(1)

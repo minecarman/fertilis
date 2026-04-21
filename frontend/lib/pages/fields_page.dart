@@ -21,6 +21,7 @@ class _FieldsPageState extends State<FieldsPage> {
   final MapController _mapController = MapController();
   
   bool _isDrawing = false;
+  String _mapType = "light_all";
   final List<LatLng> _currentPoints = [];
   
   final LatLng _center = const LatLng(37.1627, 28.3712);
@@ -82,6 +83,12 @@ class _FieldsPageState extends State<FieldsPage> {
         _currentPoints.add(point);
       });
     }
+  }
+
+  void _toggleMapType() {
+    setState(() {
+      _mapType = _mapType == "light_all" ? "satellite" : "light_all";
+    });
   }
 
   void _showSaveDialog() {
@@ -166,7 +173,9 @@ class _FieldsPageState extends State<FieldsPage> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+                urlTemplate: _mapType == "light_all"
+                    ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+                    : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                 subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.fertilis.frontend',
                 maxZoom: 20,
@@ -247,6 +256,18 @@ class _FieldsPageState extends State<FieldsPage> {
               mini: true,
               onPressed: _moveToCurrentLocation,
               child: const Icon(Icons.my_location, color: AppTheme.textBlack),
+            ),
+          ),
+
+          Positioned(
+            bottom: 50,
+            right: 20,
+            child: FloatingActionButton(
+              heroTag: "map_type_btn",
+              backgroundColor: AppTheme.surfaceOlive,
+              mini: true,
+              onPressed: _toggleMapType,
+              child: const Icon(Icons.satellite_alt_outlined, color: AppTheme.textBlack),
             ),
           ),
 

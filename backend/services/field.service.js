@@ -18,4 +18,14 @@ export const getFieldsByUserEmail = async (email) => {
 
   if (error) throw error;
   return data;
+
+export const deleteField = async (fieldId) => {
+  const { data, error } = await supabase
+    .from("fields")
+    .delete()
+    .eq("id", fieldId);
+
+  if (error) throw error;
+  return data;
+};
 };
