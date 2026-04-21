@@ -2,6 +2,7 @@ class Recommendation {
   final String rawName;
   final String displayName;
   final int rank;
+  final double recommendationRate;
   final String description;
   final String plantingCalendar;
 
@@ -9,6 +10,7 @@ class Recommendation {
     required this.rawName,
     required this.displayName,
     required this.rank,
+    required this.recommendationRate,
     required this.description,
     required this.plantingCalendar,
   });
@@ -65,26 +67,35 @@ class Recommendation {
       var item = entry.value;
 
       String name = '';
-      String confidenceDesc = 'Algoritmik eşleşme oranı yüksek';
+      double recommendationRate = 92 - (idx * 12);
+      if (recommendationRate < 40) recommendationRate = 40;
+      String recommendationDesc = 'Öneri oranı hesaplanıyor';
       String plantingInfo = 'Ekim tablosu bilgisi bulunamadı.';
 
       if (item is String) {
         name = item;
       } else if (item is Map) {
         name = item['name'] ?? '';
-        if (item['confidence'] != null) {
-          confidenceDesc = '%${item['confidence']} AI Uyum Oranı';
+        final rawRate = item['recommendation_rate'];
+        if (rawRate != null) {
+          final parsedRate = double.tryParse(rawRate.toString());
+          if (parsedRate != null) {
+            recommendationRate = parsedRate;
+          }
         }
         if (item['planting_calendar'] != null) {
           plantingInfo = item['planting_calendar'];
         }
       }
 
+      recommendationDesc = '%${recommendationRate.toStringAsFixed(0)} Öneri Oranı';
+
       return Recommendation(
         rawName: name,
         displayName: translate(name),
         rank: idx + 1,
-        description: confidenceDesc,
+        recommendationRate: recommendationRate,
+        description: recommendationDesc,
         plantingCalendar: plantingInfo,
       );
     }).toList();

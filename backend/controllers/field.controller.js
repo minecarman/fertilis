@@ -17,6 +17,7 @@ export const getFields = asyncHandler(async (req, res, next) => {
   const { email } = req.params;
   const data = await fieldService.getFieldsByUserEmail(email);
   res.json(data);
+});
 
 export const deleteField = asyncHandler(async (req, res, next) => {
   const { fieldId } = req.params;
@@ -27,5 +28,4 @@ export const deleteField = asyncHandler(async (req, res, next) => {
 
   await fieldService.deleteField(fieldId);
   res.status(200).json({ message: "Tarla başarıyla silindi!" });
-});
 });

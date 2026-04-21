@@ -195,7 +195,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ListTile(
                             leading: const Icon(Icons.landscape_outlined, color: AppTheme.wikilocGreen),
                             title: Text(field.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            subtitle: Text("${field.area.toStringAsFixed(1)} ha"),
+                            subtitle: Text("${field.calculatedArea.toStringAsFixed(1)} ha"),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline, color: AppTheme.errorClay),
                               onPressed: () => _deleteField(field),

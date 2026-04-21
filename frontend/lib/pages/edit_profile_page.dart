@@ -92,12 +92,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Ad Soyad", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
+              const Text("Kullanıcı Adı", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textBlack)),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  hintText: "Adınızı girin",
+                  hintText: "Kullanıcı adınızı girin",
                   filled: true,
                   fillColor: AppTheme.surfaceOlive,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),

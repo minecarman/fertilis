@@ -111,14 +111,6 @@ class _RecommendationPageState extends State<RecommendationPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              crop.description,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.textBlack,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
                               crop.plantingCalendar,
                               style: const TextStyle(
                                 color: AppTheme.textGrey,
@@ -127,7 +119,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
                             ),
                           ],
                         ),
-                        isThreeLine: true,
+                        isThreeLine: false,
                         trailing: const Icon(
                           Icons.check_circle_outline,
                           color: AppTheme.mossGreen,

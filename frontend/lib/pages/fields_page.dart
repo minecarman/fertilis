@@ -136,7 +136,7 @@ class _FieldsPageState extends State<FieldsPage> {
     final newField = Field(
       userEmail: email,
       name: name.isEmpty ? "Yeni Tarla ${myFields.length + 1}" : name,
-      area: 10.0, 
+      area: Field.calculateAreaHa(List.from(_currentPoints)),
       points: List.from(_currentPoints),
     );
 

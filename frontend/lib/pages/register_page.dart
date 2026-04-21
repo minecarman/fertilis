@@ -173,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             textCapitalization: TextCapitalization.words,
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.person_outline, color: AppTheme.textGrey),
-                              hintText: "Ad Soyad",
+                              hintText: "Kullanıcı Adı",
                               filled: true,
                               fillColor: AppTheme.backgroundGrey,
                               contentPadding: const EdgeInsets.symmetric(vertical: 16),

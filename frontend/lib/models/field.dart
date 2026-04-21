@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:latlong2/latlong.dart';
 
 class Field {
@@ -8,6 +9,32 @@ class Field {
   final List<LatLng> points;
 
   List<LatLng> get boundaries => points; 
+  double get calculatedArea => calculateAreaHa(points);
+
+  static double calculateAreaHa(List<LatLng> polygon) {
+    if (polygon.length < 3) return 0;
+
+    const earthRadius = 6371000.0;
+    final avgLat = polygon.fold<double>(0, (sum, point) => sum + point.latitude) / polygon.length;
+    final latFactor = earthRadius * (3.141592653589793 / 180.0);
+    final lngFactor = earthRadius * (3.141592653589793 / 180.0) * math.cos(avgLat * 3.141592653589793 / 180.0);
+
+    double area = 0;
+    for (var i = 0; i < polygon.length; i++) {
+      final current = polygon[i];
+      final next = polygon[(i + 1) % polygon.length];
+
+      final x1 = current.longitude * lngFactor;
+      final y1 = current.latitude * latFactor;
+      final x2 = next.longitude * lngFactor;
+      final y2 = next.latitude * latFactor;
+
+      area += (x1 * y2) - (x2 * y1);
+    }
+
+    return area.abs() / 2 / 10000.0;
+  }
+
   LatLng get center {
     if (points.isEmpty) return const LatLng(0, 0);
     double lat = 0, lng = 0;

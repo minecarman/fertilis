@@ -115,7 +115,21 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         ],
       ),
-      body: myFields.isEmpty ? _buildEmptyState() : _buildContent(),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const AssetImage("assets/images/background.png"),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              AppTheme.darkGreen.withValues(alpha: 0.16),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: myFields.isEmpty ? _buildEmptyState() : _buildContent(),
+      ),
     );
   }
 
