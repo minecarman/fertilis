@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 
 class Field {
@@ -54,14 +55,40 @@ class Field {
     this.imageUrl,
   });
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static List<LatLng> _parsePoints(dynamic coordinatesRaw) {
+    if (coordinatesRaw is String) {
+      try {
+        final decoded = jsonDecode(coordinatesRaw);
+        return _parsePoints(decoded);
+      } catch (_) {
+        return const <LatLng>[];
+      }
+    }
+
+    if (coordinatesRaw is! List) {
+      return const <LatLng>[];
+    }
+
+    return coordinatesRaw
+        .whereType<Map>()
+        .map((p) => LatLng(_toDouble(p['lat']), _toDouble(p['lng'])))
+        .toList();
+  }
+
   factory Field.fromJson(Map<String, dynamic> json) {
-    var coords = json['coordinates'] as List;
+    final parsedPoints = _parsePoints(json['coordinates']);
     return Field(
       id: json['id'].toString(),
       userEmail: json['user_email'] ?? "",
       name: json['name'] ?? "Adsız",
-      area: (json['area'] ?? 0).toDouble(),
-      points: coords.map((p) => LatLng(p['lat'], p['lng'])).toList(),
+      area: _toDouble(json['area']),
+      points: parsedPoints,
       crop: json['crop']?.toString(),
       imageUrl: json['image_url']?.toString(),
     );

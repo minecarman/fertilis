@@ -26,10 +26,12 @@ class _FieldsPageState extends State<FieldsPage> {
   static const int _maxDrawPoints = 80;
   static const double _minZoom = 5.0;
   static const double _maxZoom = 19.0;
+  static const double _fieldLabelZoomThreshold = 13.5;
   
   bool _isDrawing = false;
   bool _isSaving = false;
   String _mapType = "light_all";
+  double _currentZoom = 15.0;
   final List<LatLng> _currentPoints = [];
   LatLng? _currentLocation;
   
@@ -73,14 +75,17 @@ class _FieldsPageState extends State<FieldsPage> {
   void _loadFields() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     String email = authProvider.currentUserEmail ?? "test@user.com";
+    debugPrint("[FieldsPage._loadFields] fetching for email=$email");
     final fieldsResult = await FieldService.getFields(email);
     
     if (mounted) {
       fieldsResult.fold(
         (error) {
+          debugPrint("[FieldsPage._loadFields] failed: $error");
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
         },
         (fields) {
+          debugPrint("[FieldsPage._loadFields] success. count=${fields.length}");
           setState(() {
             myFields = fields;
           });
@@ -123,6 +128,15 @@ class _FieldsPageState extends State<FieldsPage> {
     });
   }
 
+  void _handleMapPositionChanged(MapCamera position, bool hasGesture) {
+    final zoom = position.zoom;
+    if (zoom != _currentZoom) {
+      setState(() {
+        _currentZoom = zoom;
+      });
+    }
+  }
+
   void _showSaveDialog() {
     if (_currentPoints.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -132,19 +146,6 @@ class _FieldsPageState extends State<FieldsPage> {
     }
 
     final nameController = TextEditingController();
-    const cropOptions = <String>[
-      'Buğday',
-      'Mısır',
-      'Arpa',
-      'Ayçiçeği',
-      'Pamuk',
-      'Zeytin',
-      'Üzüm',
-      'Domates',
-      'Patates',
-      'Diğer',
-    ];
-    String selectedCrop = cropOptions.first;
     String? selectedImageFileName;
     Uint8List? selectedImageBytes;
     bool isPickingImage = false;
@@ -166,21 +167,6 @@ class _FieldsPageState extends State<FieldsPage> {
                     labelText: "Tarla Adı",
                     prefixIcon: Icon(Icons.label),
                   ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: selectedCrop,
-                  decoration: const InputDecoration(
-                    labelText: "Ekin",
-                    prefixIcon: Icon(Icons.grass),
-                  ),
-                  items: cropOptions
-                      .map((crop) => DropdownMenuItem(value: crop, child: Text(crop)))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setDialogState(() => selectedCrop = value);
-                  },
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -226,7 +212,7 @@ class _FieldsPageState extends State<FieldsPage> {
 
                               if (length > _maxImageBytes) {
                                 if (!mounted) return;
-                                ScaffoldMessenger.of(this.context).showSnackBar(
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text("Fotoğraf çok büyük. Lütfen daha küçük boyutlu bir görsel seçin (Maks: 4MB)."),
                                   ),
@@ -246,7 +232,7 @@ class _FieldsPageState extends State<FieldsPage> {
                             } catch (e, stacktrace) {
                               debugPrint("[DEBUG] Error picking image: $e\n$stacktrace");
                               if (!mounted) return;
-                              ScaffoldMessenger.of(this.context).showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("Fotoğraf seçilemedi: $e")),
                               );
                             } finally {
@@ -262,6 +248,15 @@ class _FieldsPageState extends State<FieldsPage> {
                 ),
                 if (selectedImageBytes != null) ...[
                   const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.memory(
+                      selectedImageBytes!,
+                      height: 84,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   const Text("Görsel başarıyla seçildi.", style: TextStyle(fontSize: 12, color: Colors.green)),
                 ]
               ],
@@ -277,7 +272,6 @@ class _FieldsPageState extends State<FieldsPage> {
                 Navigator.pop(ctx);
                 _saveFieldToBackend(
                   nameController.text,
-                  crop: selectedCrop,
                   imageBytes: selectedImageBytes,
                   imageFileName: selectedImageFileName,
                 );
@@ -290,68 +284,82 @@ class _FieldsPageState extends State<FieldsPage> {
     );
   }
 
-  void _saveFieldToBackend(String name, {String? crop, Uint8List? imageBytes, String? imageFileName}) async {
+  void _saveFieldToBackend(String name, {Uint8List? imageBytes, String? imageFileName}) async {
     if (_isSaving) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     String email = authProvider.currentUserEmail ?? "test@user.com";
+    final messenger = ScaffoldMessenger.of(context);
     setState(() => _isSaving = true);
-
-    String? imageUrl;
-    if (imageBytes != null) {
-      final uploadResult = await FieldService.uploadFieldImage(
-        userEmail: email,
-        imageBase64: base64Encode(imageBytes),
-        fileName: imageFileName ?? "field.jpg",
-      );
-
-      final uploadFailed = uploadResult.fold(
-        (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error), backgroundColor: AppTheme.errorClay),
-          );
-          return true;
-        },
-        (url) {
-          imageUrl = url;
-          return false;
-        },
-      );
-
-      if (uploadFailed) {
-        if (mounted) setState(() => _isSaving = false);
-        return;
-      }
-    }
 
     final newField = Field(
       userEmail: email,
       name: name.isEmpty ? "Yeni Tarla ${myFields.length + 1}" : name,
       area: Field.calculateAreaHa(List.from(_currentPoints)),
       points: List.from(_currentPoints),
-      crop: crop,
-      imageUrl: imageUrl,
+      crop: null,
+      imageUrl: null,
     );
 
     final result = await FieldService.saveField(newField);
 
     if (!mounted) return;
+    final saveError = result.fold((error) => error, (_) => null);
+    if (saveError != null) {
+      messenger.showSnackBar(SnackBar(content: Text(saveError), backgroundColor: AppTheme.errorClay));
+      setState(() => _isSaving = false);
+      return;
+    }
 
-    result.fold(
-      (error) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: AppTheme.errorClay));
-        setState(() => _isSaving = false);
-      },
-      (_) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tarla başarıyla kaydedildi!")));
-        setState(() {
-          _isDrawing = false;
-          _isSaving = false;
-          _currentPoints.clear();
-        });
-        _loadFields(); 
-      }
+    final savedField = result.fold((_) => null, (field) => field);
+    if (savedField == null) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text("Tarla kaydedildi ancak cevap okunamadı."), backgroundColor: AppTheme.errorClay),
+      );
+      setState(() => _isSaving = false);
+      return;
+    }
+
+    String? uploadedImageUrl;
+    if (imageBytes != null) {
+      final uploadResult = await FieldService.uploadFieldImage(
+        userEmail: email,
+        imageBase64: base64Encode(imageBytes),
+        fileName: imageFileName ?? "field.jpg",
+        fieldId: savedField.id,
+      );
+
+      uploadResult.fold(
+        (error) {
+          messenger.showSnackBar(
+            SnackBar(content: Text("Tarla kaydedildi fakat görsel yüklenemedi: $error"), backgroundColor: AppTheme.errorClay),
+          );
+        },
+        (url) {
+          uploadedImageUrl = url;
+        },
+      );
+    }
+
+    final finalField = Field(
+      id: savedField.id,
+      userEmail: savedField.userEmail,
+      name: savedField.name,
+      area: savedField.area,
+      points: savedField.points,
+      crop: savedField.crop,
+      imageUrl: uploadedImageUrl ?? savedField.imageUrl,
     );
+
+    messenger.showSnackBar(const SnackBar(content: Text("Tarla başarıyla kaydedildi!")));
+    setState(() {
+      // Optimistic update: immediately reflect the new field in shared in-memory list.
+      myFields = [finalField, ...myFields];
+      _isDrawing = false;
+      _isSaving = false;
+      _currentPoints.clear();
+    });
+    _loadFields();
   }
 
   @override
@@ -365,6 +373,7 @@ class _FieldsPageState extends State<FieldsPage> {
               initialCenter: _center,
               initialZoom: 15.0,
               initialRotation: 0,
+              onPositionChanged: _handleMapPositionChanged,
               interactionOptions: const InteractionOptions(
                 flags: InteractiveFlag.pinchZoom |
                   InteractiveFlag.drag |
@@ -393,6 +402,41 @@ class _FieldsPageState extends State<FieldsPage> {
                   );
                 }).toList(),
               ),
+
+              if (_currentZoom >= _fieldLabelZoomThreshold)
+                MarkerLayer(
+                  markers: myFields
+                      .where((field) => field.points.length >= 3)
+                      .map((field) {
+                        return Marker(
+                          point: field.center,
+                          width: 112,
+                          height: 30,
+                          child: IgnorePointer(
+                            child: Center(
+                              child: Text(
+                                field.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppTheme.darkGreen,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.white.withValues(alpha: 0.9),
+                                      blurRadius: 3,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      })
+                      .toList(),
+                ),
 
               if (_isDrawing && _currentPoints.isNotEmpty)
                 PolygonLayer(
@@ -476,7 +520,7 @@ class _FieldsPageState extends State<FieldsPage> {
             ),
 
           Positioned(
-            bottom: 150,
+            bottom: 270,
             right: 20,
             child: FloatingActionButton(
               heroTag: "zoom_in_btn",
@@ -488,7 +532,7 @@ class _FieldsPageState extends State<FieldsPage> {
           ),
 
           Positioned(
-            bottom: 100,
+            bottom: 220,
             right: 20,
             child: FloatingActionButton(
               heroTag: "zoom_out_btn",
@@ -500,7 +544,7 @@ class _FieldsPageState extends State<FieldsPage> {
           ),
 
           Positioned(
-            bottom: 50,
+            bottom: 170,
             right: 20,
             child: FloatingActionButton(
               heroTag: "gps_btn",
@@ -512,7 +556,7 @@ class _FieldsPageState extends State<FieldsPage> {
           ),
 
           Positioned(
-            bottom: 0,
+            bottom: 120,
             right: 20,
             child: FloatingActionButton(
               heroTag: "map_type_btn",

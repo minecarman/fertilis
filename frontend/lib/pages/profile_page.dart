@@ -15,6 +15,65 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  Future<void> _editField(Field field) async {
+    final fieldId = int.tryParse(field.id ?? "");
+    if (fieldId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tarla düzenlenemedi. Geçersiz tarla ID.")),
+        );
+      }
+      return;
+    }
+
+    final nameController = TextEditingController(text: field.name);
+
+    final updatedName = await showDialog<String?>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Tarla adı düzenle"),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(labelText: "Tarla Adı"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: const Text("İptal"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, nameController.text),
+            child: const Text("Kaydet"),
+          ),
+        ],
+      ),
+    );
+
+    if (updatedName == null) return;
+
+    final result = await FieldService.updateFieldName(fieldId: fieldId, name: updatedName);
+    if (!mounted) return;
+
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: AppTheme.errorClay),
+        );
+      },
+      (updatedField) {
+        setState(() {
+          final index = myFields.indexWhere((item) => item.id == updatedField.id);
+          if (index != -1) {
+            myFields[index] = updatedField;
+          }
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Tarla adı güncellendi.")),
+        );
+      },
+    );
+  }
+
   Future<void> _deleteField(Field field) async {
     final fieldId = int.tryParse(field.id ?? "");
     if (fieldId == null) {
@@ -183,9 +242,18 @@ class _ProfilePageState extends State<ProfilePage> {
                             leading: const Icon(Icons.landscape_outlined, color: AppTheme.wikilocGreen),
                             title: Text(field.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                             subtitle: Text("${field.calculatedArea.toStringAsFixed(1)} ha"),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppTheme.errorClay),
-                              onPressed: () => _deleteField(field),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined, color: AppTheme.wikilocGreen),
+                                  onPressed: () => _editField(field),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: AppTheme.errorClay),
+                                  onPressed: () => _deleteField(field),
+                                ),
+                              ],
                             ),
                           ),
                           if (field != myFields.last)

@@ -84,6 +84,21 @@ class _DashboardViewState extends State<DashboardView> {
   Future<Either<String, Weather>>? _weatherFuture;
   static const int _maxInlineImageChars = 1300000;
 
+  void _syncActiveFieldWithList() {
+    if (myFields.isEmpty) {
+      activeField = null;
+      _weatherFuture = null;
+      return;
+    }
+
+    final stillExists = activeField != null &&
+        myFields.any((f) => f.id == activeField!.id && f.name == activeField!.name);
+    if (!stillExists) {
+      activeField = myFields.first;
+      _refreshWeatherForActiveField();
+    }
+  }
+
   void _refreshWeatherForActiveField() {
     if (activeField == null) {
       _weatherFuture = null;
@@ -106,6 +121,8 @@ class _DashboardViewState extends State<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
+    _syncActiveFieldWithList();
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(

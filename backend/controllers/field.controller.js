@@ -30,13 +30,26 @@ export const deleteField = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "Tarla başarıyla silindi!" });
 });
 
+export const updateFieldName = asyncHandler(async (req, res, next) => {
+  const { fieldId } = req.params;
+  const { name } = req.body;
+
+  if (!fieldId) {
+    return next(new AppError("Tarla ID gerekli.", 400));
+  }
+
+  const field = await fieldService.updateFieldName({ fieldId, name });
+  res.status(200).json({ message: "Tarla adı güncellendi!", field });
+});
+
 export const uploadFieldImage = asyncHandler(async (req, res, next) => {
-  const { user_email, image_base64, file_name } = req.body;
+  const { user_email, image_base64, file_name, field_id } = req.body;
 
   console.log('[field.uploadFieldImage] request received', {
     hasUserEmail: Boolean(user_email),
     hasImageBase64: Boolean(image_base64),
     file_name,
+    field_id,
     bodyKeys: Object.keys(req.body || {}),
   });
 
@@ -44,7 +57,7 @@ export const uploadFieldImage = asyncHandler(async (req, res, next) => {
     return next(new AppError("user_email ve image_base64 gerekli.", 400));
   }
 
-  const imageUrl = await fieldService.uploadFieldImage({ user_email, image_base64, file_name });
+  const imageUrl = await fieldService.uploadFieldImage({ user_email, image_base64, file_name, field_id });
   console.log('[field.uploadFieldImage] upload complete', { imageUrl });
   res.status(201).json({ image_url: imageUrl });
 });
