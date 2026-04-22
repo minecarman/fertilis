@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 import '../models/wiki_model.dart';
-import '../widgets/app_logo.dart';
 
 class WikiPage extends StatefulWidget {
   const WikiPage({super.key});
@@ -38,9 +37,10 @@ class _WikiPageState extends State<WikiPage> {
       appBar: AppBar(
         titleSpacing: 0,
         centerTitle: true,
-        title: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: AppLogo(alignment: Alignment.center),
+        title: Image.asset(
+          'assets/images/text_transparent.png',
+          height: 30,
+          fit: BoxFit.contain,
         ),
         backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,

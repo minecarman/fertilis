@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppLogo extends StatelessWidget {
   const AppLogo({
     super.key,
-    this.height = 45,
+    this.height = 40,
     this.assetPath = 'assets/images/full_logo_transparent.png',
     this.alignment = Alignment.centerLeft,
   });

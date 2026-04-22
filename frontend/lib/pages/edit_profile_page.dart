@@ -84,7 +84,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         centerTitle: true,
         title: Image.asset(
           'assets/images/text_transparent.png',
-          height: 45,
+          height: 30,
           fit: BoxFit.contain,
         ),
         backgroundColor: AppTheme.surfaceOlive,
