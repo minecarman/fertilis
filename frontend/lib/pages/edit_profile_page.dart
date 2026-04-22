@@ -80,7 +80,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
-        title: const Text("Profili Düzenle", style: TextStyle(fontWeight: FontWeight.w800)),
+        titleSpacing: 0,
+        centerTitle: true,
+        title: Image.asset(
+          'assets/images/text_transparent.png',
+          height: 45,
+          fit: BoxFit.contain,
+        ),
         backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,

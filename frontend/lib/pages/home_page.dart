@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:go_router/go_router.dart';
 import 'package:fpdart/fpdart.dart' hide State;
+import 'package:provider/provider.dart';
 import '../models/field.dart';
 import '../core/theme.dart';
 import 'fields_page.dart';
@@ -10,8 +11,11 @@ import 'weather_page.dart';
 import 'irrigation_page.dart';
 import 'recommendation_page.dart';
 import 'yield_page.dart';
+import '../providers/auth_provider.dart';
+import '../services/field_service.dart';
 import '../models/weather.dart';
 import '../services/weather_service.dart';
+import '../widgets/app_logo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -82,7 +86,38 @@ class DashboardView extends StatefulWidget {
 class _DashboardViewState extends State<DashboardView> {
   Field? activeField;
   Future<Either<String, Weather>>? _weatherFuture;
+  bool _isLoadingFields = false;
   static const int _maxInlineImageChars = 1300000;
+
+  Future<void> _loadFieldsIfNeeded() async {
+    if (myFields.isNotEmpty || _isLoadingFields) return;
+
+    setState(() => _isLoadingFields = true);
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final email = authProvider.currentUserEmail;
+    if (email == null || email.isEmpty) {
+      if (mounted) {
+        setState(() => _isLoadingFields = false);
+      }
+      return;
+    }
+
+    final fieldsResult = await FieldService.getFields(email);
+    if (!mounted) return;
+
+    fieldsResult.fold(
+      (_) {
+        // Keep empty state if fetch fails.
+      },
+      (fields) {
+        myFields = fields;
+      },
+    );
+
+    _syncActiveFieldWithList();
+    setState(() => _isLoadingFields = false);
+  }
 
   void _syncActiveFieldWithList() {
     if (myFields.isEmpty) {
@@ -117,6 +152,9 @@ class _DashboardViewState extends State<DashboardView> {
       activeField = myFields.first;
     }
     _refreshWeatherForActiveField();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadFieldsIfNeeded();
+    });
   }
 
   @override
@@ -126,11 +164,22 @@ class _DashboardViewState extends State<DashboardView> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
-        title: const Text("Fertilis", style: TextStyle(fontWeight: FontWeight.w800)),
+        titleSpacing: 0,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: AppLogo(),
+        ),
         backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,
         actions: [
+          IconButton(
+            tooltip: "Wiki",
+            onPressed: () {
+              context.pushNamed('wiki');
+            },
+            icon: const Icon(Icons.menu_book_outlined),
+          ),
           PopupMenuButton<int>(
             tooltip: "Bildirimler",
             offset: const Offset(0, 40),
@@ -172,7 +221,11 @@ class _DashboardViewState extends State<DashboardView> {
             ),
           ),
         ),
-        child: myFields.isEmpty ? _buildEmptyState() : _buildContent(),
+        child: _isLoadingFields && myFields.isEmpty
+            ? const Center(
+                child: CircularProgressIndicator(color: AppTheme.wikilocGreen),
+              )
+            : (myFields.isEmpty ? _buildEmptyState() : _buildContent()),
       ),
     );
   }

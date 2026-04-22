@@ -1,0 +1,194 @@
+[
+  {
+    "title": "Toprak ve Verimlilik",
+    "topics": [
+      {
+        "title": "Toprağı sadece kir değil, yaşayan bir sistem olarak düşünün",
+        "content": "Toprak; mineral parçacıklar, organik madde, su, hava ve canlılardan oluşur. Bitki kökleri için sadece tutunma zemini değil, su ve besin kaynağıdır. Bu yüzden yapısını korumak, verimi korumak kadar önemlidir."
+      },
+      {
+        "title": "Toprak analizi ile başlayın",
+        "content": "pH, organik madde ve temel besinler bilinmeden yapılan gübreleme çoğu zaman israf olur. Analiz; hangi besinin eksik olduğunu, hangi uygulamanın gerçekten fayda sağlayacağını gösterir."
+      },
+      {
+        "title": "Sık sürüm toprağı yorar",
+        "content": "Aşırı işleme toprağın yapısını bozabilir, nem kaybını hızlandırabilir ve organik maddeyi azaltabilir. Daha az bozucu işlem, özellikle kurak dönemlerde, toprağın su tutmasını destekler."
+      },
+      {
+        "title": "Asitlenme ve tuzluluğu takip edin",
+        "content": "Toprak zamanla asitleşebilir veya tuz biriktirebilir. Bu durum besin alımını sınırlar. Kireçleme, drenaj ve doğru sulama gibi önlemler, toprağın tekrar dengelenmesine yardımcı olur."
+      }
+    ]
+  },
+  {
+    "title": "Ekim ve Ekim Nöbeti",
+    "topics": [
+      {
+        "title": "Doğru derinlik ve sıra düzeni",
+        "content": "Tohum çok derine giderse çıkış gecikir, çok yüzeyde kalırsa kuruma riski artar. Sıra aralığı ise ışık, hava ve işçilik kolaylığı sağlar. En iyi sonuç, tohum türüne göre ayarlanmış derinlik ve düzenli sıra yapısıyla alınır."
+      },
+      {
+        "title": "Aynı ürünü aynı yere arka arkaya ekmeyin",
+        "content": "Tek ürünün sürekli aynı alanda yetiştirilmesi belirli besinleri tüketir ve bazı zararlı ile hastalıkların yerleşmesini kolaylaştırır. Rotasyon, bu baskıyı dağıtarak toprağın kendini toparlamasına yardım eder."
+      },
+      {
+        "title": "Baklagiller rotasyonda güçlüdür",
+        "content": "Baklagiller köklerindeki bakteriler sayesinde havadaki azotu toprağa kazandırabilir. Bu yüzden tahıllar ve azot isteyen ürünler için iyi bir ön bitkidir."
+      },
+      {
+        "title": "Bitki kalıntılarını planlı yönetin",
+        "content": "Hasat sonrası kalan kök ve saplar toprağa organik madde sağlar. Ancak hastalıklı artıklar tarlada bırakılmamalıdır; yoksa sorun bir sonraki sezona taşınabilir."
+      }
+    ]
+  },
+  {
+    "title": "Sulama ve Su Yönetimi",
+    "topics": [
+      {
+        "title": "Su miktarı bitkiye göre değişir",
+        "content": "Her ürünün su ihtiyacı farklıdır. Örneğin sebzeler, tahıllar ve meyve ağaçları aynı sıklıkta sulanmaz. Sulamayı ürüne, iklime ve gelişim dönemine göre ayarlayın."
+      },
+      {
+        "title": "Damla sulama suyu köke taşır",
+        "content": "Damla sulama, suyu doğrudan kök bölgesine verdiği için buharlaşma ve yüzey akışı kaybını azaltır. Özellikle suyun kıt olduğu yerlerde verimi korumak için en etkili yöntemlerden biridir."
+      },
+      {
+        "title": "Aşırı sulama gizli zarar verir",
+        "content": "Fazla su kökleri havasız bırakabilir, besinleri yıkayabilir ve hastalık riskini artırabilir. Toprak nemini elle, basit bir çubukla veya sensörle kontrol etmek daha güvenlidir."
+      },
+      {
+        "title": "Sulama zamanlaması önemlidir",
+        "content": "Serin saatlerde sulama, buharlaşma kaybını azaltır. Ayrıca yağışlı dönemlerde ve su basan alanlarda sulama sıklığı mutlaka düşürülmelidir."
+      }
+    ]
+  },
+  {
+    "title": "Gübreleme ve Besin Yönetimi",
+    "topics": [
+      {
+        "title": "NPK ne işe yarar",
+        "content": "Azot yaprak ve sürgün gelişimini, fosfor kök ve çiçek gelişimini, potasyum ise su dengesi ve dayanıklılığı destekler. Tek bir besine yüklenmek yerine dengeli beslenme hedeflenmelidir."
+      },
+      {
+        "title": "Azotu tek seferde vermeyin",
+        "content": "Azot, yağmur ve sulama ile kolayca kaybolabilir. Bunu bölerek vermek, bitkinin ihtiyacına daha iyi uyar ve kaybı azaltır."
+      },
+      {
+        "title": "Kireçleme sadece pH düzeltmek değildir",
+        "content": "Kireçleme, asidik toprağı dengeleyebilir ve bazı besinlerin bitki tarafından alınmasını kolaylaştırır. Ancak fazla kullanılırsa mikrobiyal dengeyi ve besin erişimini bozabilir."
+      },
+      {
+        "title": "Eksiklik belirtilerini takip edin",
+        "content": "Sarı yapraklar, morarmalar, cılız büyüme ve zayıf kök gelişimi besin eksikliğine işaret edebilir. Belirtiye bakarken tek yaprak değil, tüm bitki ve tarlanın geneli birlikte değerlendirilmelidir."
+      }
+    ]
+  },
+  {
+    "title": "Zararlı ve Hastalık Yönetimi",
+    "topics": [
+      {
+        "title": "Mücadeleye gözlemle başlayın",
+        "content": "IPM yaklaşımında ilk adım düzenli gözlem ve doğru teşhistir. Zararlıyı tanımadan yapılan ilaçlama hem masrafı artırır hem de direnç gelişimine yol açabilir."
+      },
+      {
+        "title": "Eşik değere göre karar verin",
+        "content": "Her zararlı görülünce ilaç gerekmez. Zararlı seviyesi ekonomik kaybı aşmadan önce kültürel, mekanik veya biyolojik yöntemler denenebilir."
+      },
+      {
+        "title": "Temizlik bulaşmayı azaltır",
+        "content": "Hastalık taşıyan bitki artıklarını temizlemek, ekipmanı yıkamak ve enfekte alanı ayırmak yayılımı yavaşlatır. Sıcak ve nemli koşullar birçok hastalığı hızlandırır."
+      },
+      {
+        "title": "Kimyasalı son seçenek olarak görün",
+        "content": "Kimyasal uygulama gerekli olduğunda doz, zaman ve hedef doğru seçilmelidir. Aynı etki grubunu sürekli kullanmak direnç oluşumunu hızlandırır."
+      },
+      {
+        "title": "Bir sorun gördüğünüzde önce haritayı çıkarın",
+        "content": "Belirti yaprakta mı, gövdede mi, kökte mi? Yeni sürgünde mi, yaşlı yaprakta mı? Nokta, leke, sararma, solma veya küf gibi işaretleri ayırmak doğru teşhis için ilk adımdır."
+      },
+      {
+        "title": "Düzgün olmayan sulama hastalık gibi görünebilir",
+        "content": "Bazı sararmalar, solmalar ve büyüme gerilikleri hastalık değil su stresi, kök hasarı veya besin eksikliği olabilir. Önce sulama, drenaj ve gübreleme geçmişini kontrol edin."
+      }
+    ]
+  },
+  {
+    "title": "Bitki Hastalıklarını Tanıma",
+    "topics": [
+      {
+        "title": "Yaprak lekeleri",
+        "content": "Yuvarlak ya da düzensiz kahverengi-siyah lekeler çoğu zaman mantar veya bakteriyel yaprak lekesini düşündürür. Yağışlı hava, ıslak yaprak ve sık dikim bu sorunu artırır. Hastalıklı yaprakları toplayın, üstten sulamayı azaltın ve hava akışını artırın."
+      },
+      {
+        "title": "Külleme",
+        "content": "Yaprak üstünde un serpilmiş gibi beyaz bir tabaka oluşuyorsa bu çoğu zaman küllemedir. Genellikle sıcak günler ve serin geceler, sık bitki örtüsü ve zayıf havalanma ile artar. Çiçek, sebze ve meyve bitkilerinde erken fark etmek önemlidir."
+      },
+      {
+        "title": "Mildiyö",
+        "content": "Yaprak üstünde sarımsı lekeler, alt yüzde ise nemli havalarda gri-mor küf benzeri tabaka görülüyorsa mildiyö olabilir. Özellikle uzun süre yaprak ıslak kaldığında yayılır. Erken yaprak temizliği ve yaprakları gece ıslak bırakmamak önemlidir."
+      },
+      {
+        "title": "Solgunluk ve damar tıkanması",
+        "content": "Bitki sulu toprakta bile sarkıyorsa sorun köklerde veya iletim damarlarında olabilir. Bakteriyel ya da fungal solgunluklarda bitki aniden çöker. Gerekirse gövdeyi kesince damar kahverengileşmesi görülebilir. Bu tür hastalıklar hızla yayılabilir."
+      },
+      {
+        "title": "Kök çürüklüğü",
+        "content": "Büyüme yavaşlar, yapraklar sararır ve kökler kahverengi-yumuşak hale gelirse kök çürüklüğü düşünülür. En büyük risk fazla sulama, kötü drenaj ve ağır topraktır. Bitkiyi kurtarmak için önce suyu azaltmak ve toprağın havalanmasını iyileştirmek gerekir."
+      },
+      {
+        "title": "Viral mozaik",
+        "content": "Yapraklarda açık koyu yeşil karışık mozaik desen, şekil bozukluğu ve cılız büyüme varsa virüs şüphesi oluşur. Virüslerde tedavi yoktur; hasta bitki kaldırılır, ekipman temizlenir ve yaprak biti gibi taşıyıcılar kontrol edilir."
+      },
+      {
+        "title": "Bakteriyel leke ve çürüme",
+        "content": "Su ıslaklığı gibi görünen lekeler, yumuşak çürükler ve kötü koku bakteriyel hastalıklara işaret edebilir. Yağmurlu hava ve sıçrayan su yayılımı artırır. Hastalıklı parçaları tarlada bırakmamak önemlidir."
+      },
+      {
+        "title": "Ne zaman yardım alınmalı",
+        "content": "Belirti hızla yayılıyorsa, aynı anda birçok bitkide görülüyorsa ya da kök, gövde ve meyvede birlikte zarar varsa numune alıp yerel tarım danışmanına göstermek en güvenli yoldur."
+      }
+    ]
+  },
+  {
+    "title": "Kompost ve Organik Madde",
+    "topics": [
+      {
+        "title": "Kompost toprağı sadece beslemez",
+        "content": "İyi hazırlanmış kompost toprağa organik madde kazandırır, mikrobiyal yaşamı güçlendirir ve yapıyı iyileştirir. Bu yüzden yalnızca gübre gibi değil, toprak düzenleyici gibi düşünülmelidir."
+      },
+      {
+        "title": "Karbon ve azot dengesi önemlidir",
+        "content": "Kompostun iyi çalışması için kuru kahverengi malzemeler ile yeşil, azotlu malzemeler birlikte gerekir. Hava ve nem dengesi bozulursa yığın kötü kokabilir veya yavaşlar."
+      },
+      {
+        "title": "İyi kompost koyu renkli ve toprak kokuludur",
+        "content": "Olgun kompost, keskin çürüme kokusu değil, nemli toprak kokusu verir. Hala sıcaksa veya tanınabilir organik parçalar çok fazlaysa, kullanmadan önce bekletmek gerekir."
+      },
+      {
+        "title": "Taze atık doğrudan ekim yatağına konmaz",
+        "content": "Tam ayrışmamış materyal geçici azot bağlanmasına ve fide zararına neden olabilir. Bu yüzden kompostu iyi olgunlaştırmak önemlidir."
+      }
+    ]
+  },
+  {
+    "title": "Hasat ve Depolama",
+    "topics": [
+      {
+        "title": "Hasat zamanını ürün belirtir",
+        "content": "Erken hasat kaliteyi düşürebilir, geç hasat ise dökülme ve kayıp oluşturabilir. Olgunluk rengi, sertliği, tane doluluğu ve pazar talebi birlikte değerlendirilmelidir."
+      },
+      {
+        "title": "Hasattan sonra gölge ve havalandırma gerekir",
+        "content": "Güneş altında bırakılan ürün hızlı su kaybeder ve sıcaklık yükselir. Kısa süreli gölge, hava akışı ve temiz yüzeyler kaliteyi korur."
+      },
+      {
+        "title": "Temiz depo böceği ve küfü azaltır",
+        "content": "Depo, çuval ve kasa temizliği; eski artıkların yeni ürüne bulaşmasını engeller. Nem kontrolü yapılmazsa küf ve zararlı problemleri hızla artar."
+      },
+      {
+        "title": "Nemli ürün uzun süre bekletilmez",
+        "content": "Depoya giren ürün fazla nemli ise ısınma, küflenme ve kalite kaybı olabilir. Mümkünse ürün önce kurutulmalı, sonra depolanmalıdır."
+      }
+    ]
+  }
+]

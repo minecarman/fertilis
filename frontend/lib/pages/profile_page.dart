@@ -132,7 +132,13 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundGrey,
       appBar: AppBar(
-        title: const Text("Profil", style: TextStyle(fontWeight: FontWeight.w800)),
+        titleSpacing: 0,
+        centerTitle: true,
+        title: Image.asset(
+          'assets/images/text_transparent.png',
+          height: 45,
+          fit: BoxFit.contain,
+        ),
         backgroundColor: AppTheme.surfaceOlive,
         foregroundColor: AppTheme.wikilocGreen,
         elevation: 0,
@@ -178,31 +184,37 @@ class _ProfilePageState extends State<ProfilePage> {
                 Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          context.pushNamed('edit-profile');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.wikilocGreen,
-                          foregroundColor: AppTheme.backgroundGrey,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context.pushNamed('edit-profile');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.wikilocGreen,
+                            foregroundColor: AppTheme.backgroundGrey,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text("Profili Düzenle", style: TextStyle(fontSize: 14)),
                         ),
-                        child: const Text("Profili Düzenle"),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Provider.of<AuthProvider>(context, listen: false).logout();
-                          context.goNamed('login');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.errorClay,
-                          foregroundColor: AppTheme.backgroundGrey,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Provider.of<AuthProvider>(context, listen: false).logout();
+                            context.goNamed('login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.errorClay,
+                            foregroundColor: AppTheme.backgroundGrey,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text("Çıkış Yap", style: TextStyle(fontSize: 14)),
                         ),
-                        child: const Text("Çıkış Yap"),
                       ),
                     ),
                   ],

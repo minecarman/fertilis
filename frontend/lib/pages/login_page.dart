@@ -88,16 +88,18 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.eco, size: 60, color: AppTheme.wikilocGreen),
+                    Image.asset(
+                      'assets/images/leaf_transparent.png',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.contain,
+                    ),
                     const SizedBox(height: 10),
-                    const Text(
-                      "FERTILIS",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.darkGreen,
-                        letterSpacing: 3,
-                      ),
+                    Image.asset(
+                      'assets/images/text_transparent.png',
+                      width: 200,
+                      height: 60,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(height: 5),
                     const Text(

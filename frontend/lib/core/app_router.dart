@@ -7,6 +7,7 @@ import '../pages/register_page.dart';
 import '../pages/home_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/edit_profile_page.dart';
+import '../pages/wiki_page.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -53,6 +54,11 @@ class AppRouter {
         path: '/edit-profile',
         name: 'edit-profile',
         builder: (context, state) => const EditProfilePage(),
+      ),
+      GoRoute(
+        path: '/wiki',
+        name: 'wiki',
+        builder: (context, state) => const WikiPage(),
       ),
     ],
   );

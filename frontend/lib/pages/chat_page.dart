@@ -79,7 +79,12 @@ class _ChatPageState extends State<ChatPage> {
                 children: [
                   CircleAvatar(
                     backgroundColor: AppTheme.wikilocGreen.withValues(alpha: 0.1),
-                    child: const Icon(Icons.smart_toy, color: AppTheme.wikilocGreen),
+                    child: Image.asset(
+                      'assets/images/leaf_transparent.png',
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   const Column(

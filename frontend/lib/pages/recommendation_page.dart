@@ -78,7 +78,10 @@ class _RecommendationPageState extends State<RecommendationPage> {
             else if (errorMessage.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(errorMessage, style: const TextStyle(color: AppTheme.errorClay)),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: AppTheme.errorClay),
+                ),
               )
             else if (recommendedRecommendations.isNotEmpty)
               Expanded(
