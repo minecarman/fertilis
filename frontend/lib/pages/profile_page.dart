@@ -74,6 +74,69 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Future<void> _editFieldCrop(Field field) async {
+    final fieldId = int.tryParse(field.id ?? "");
+    if (fieldId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Ekin bilgisi güncellenemedi. Geçersiz tarla ID.")),
+        );
+      }
+      return;
+    }
+
+    final cropController = TextEditingController(text: field.crop ?? "");
+
+    final updatedCrop = await showDialog<String?>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Ekin türü ekle/düzenle"),
+        content: TextField(
+          controller: cropController,
+          decoration: const InputDecoration(
+            labelText: "Ekin Türü",
+            hintText: "Örn: Buğday, mısır, domates",
+          ),
+          textInputAction: TextInputAction.done,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: const Text("İptal"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, cropController.text),
+            child: const Text("Kaydet"),
+          ),
+        ],
+      ),
+    );
+
+    if (updatedCrop == null) return;
+
+    final result = await FieldService.updateFieldCrop(fieldId: fieldId, crop: updatedCrop);
+    if (!mounted) return;
+
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: AppTheme.errorClay),
+        );
+      },
+      (updatedField) {
+        setState(() {
+          final index = myFields.indexWhere((item) => item.id == updatedField.id);
+          if (index != -1) {
+            myFields[index] = updatedField;
+          }
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Ekin bilgisi güncellendi.")),
+        );
+      },
+    );
+  }
+
   Future<void> _deleteField(Field field) async {
     final fieldId = int.tryParse(field.id ?? "");
     if (fieldId == null) {
@@ -253,10 +316,23 @@ class _ProfilePageState extends State<ProfilePage> {
                           ListTile(
                             leading: const Icon(Icons.landscape_outlined, color: AppTheme.wikilocGreen),
                             title: Text(field.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            subtitle: Text("${field.calculatedArea.toStringAsFixed(1)} ha"),
+                            subtitle: Text(
+                              field.crop != null && field.crop!.trim().isNotEmpty
+                                  ? "${field.calculatedArea.toStringAsFixed(1)} ha • ${field.crop}"
+                                  : "${field.calculatedArea.toStringAsFixed(1)} ha",
+                            ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.eco_outlined,
+                                    color: field.crop != null && field.crop!.trim().isNotEmpty
+                                        ? AppTheme.wikilocGreen
+                                        : AppTheme.darkKhaki,
+                                  ),
+                                  onPressed: () => _editFieldCrop(field),
+                                ),
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined, color: AppTheme.wikilocGreen),
                                   onPressed: () => _editField(field),

@@ -30,16 +30,16 @@ export const deleteField = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "Tarla başarıyla silindi!" });
 });
 
-export const updateFieldName = asyncHandler(async (req, res, next) => {
+export const updateField = asyncHandler(async (req, res, next) => {
   const { fieldId } = req.params;
-  const { name } = req.body;
+  const { name, crop } = req.body;
 
   if (!fieldId) {
     return next(new AppError("Tarla ID gerekli.", 400));
   }
 
-  const field = await fieldService.updateFieldName({ fieldId, name });
-  res.status(200).json({ message: "Tarla adı güncellendi!", field });
+  const field = await fieldService.updateField({ fieldId, name, crop });
+  res.status(200).json({ message: "Tarla bilgileri güncellendi!", field });
 });
 
 export const uploadFieldImage = asyncHandler(async (req, res, next) => {

@@ -179,15 +179,27 @@ export const deleteField = async (fieldId) => {
   return data;
 };
 
-export const updateFieldName = async ({ fieldId, name }) => {
-  const trimmedName = (name || "").trim();
-  if (!trimmedName) {
-    throw new Error("Tarla adı boş olamaz");
+export const updateField = async ({ fieldId, name, crop }) => {
+  const updates = {};
+
+  if (typeof name === "string") {
+    const trimmedName = name.trim();
+    if (trimmedName) {
+      updates.name = trimmedName;
+    }
+  }
+
+  if (typeof crop === "string") {
+    updates.crop = crop.trim() || null;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new Error("Güncellenecek alan yok");
   }
 
   const { data, error } = await supabase
     .from("fields")
-    .update({ name: trimmedName })
+    .update(updates)
     .eq("id", fieldId)
     .select("*")
     .single();

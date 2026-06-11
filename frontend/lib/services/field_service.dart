@@ -86,18 +86,23 @@ class FieldService {
     }
   }
 
-  static Future<Either<String, Field>> updateFieldName({
+  static Future<Either<String, Field>> updateField({
     required int fieldId,
-    required String name,
+    String? name,
+    String? crop,
   }) async {
     try {
+      final payload = <String, dynamic>{};
+      if (name != null) payload['name'] = name;
+      if (crop != null) payload['crop'] = crop;
+
       final res = await http.patch(
         Uri.parse("${ApiConfig.baseUrl}/api/v1/fields/$fieldId"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"name": name}),
+        body: jsonEncode(payload),
       );
 
-      debugPrint("[FieldService.updateFieldName] status=${res.statusCode} body=${res.body}");
+      debugPrint("[FieldService.updateField] status=${res.statusCode} body=${res.body}");
 
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body) as Map<String, dynamic>;
@@ -105,14 +110,28 @@ class FieldService {
         if (fieldJson is Map<String, dynamic>) {
           return Right(Field.fromJson(fieldJson));
         }
-        return const Left("Tarla adı güncellendi ama yanıt okunamadı.");
+        return const Left("Tarla bilgileri güncellendi ama yanıt okunamadı.");
       }
 
-      return Left("Tarla adı güncellenemedi. ${res.statusCode}: ${res.body}");
+      return Left("Tarla bilgileri güncellenemedi. ${res.statusCode}: ${res.body}");
     } catch (e) {
       debugPrint("Tarla Güncelleme Hatası: $e");
       return Left("Bağlantı Hatası: $e");
     }
+  }
+
+  static Future<Either<String, Field>> updateFieldName({
+    required int fieldId,
+    required String name,
+  }) {
+    return updateField(fieldId: fieldId, name: name);
+  }
+
+  static Future<Either<String, Field>> updateFieldCrop({
+    required int fieldId,
+    required String crop,
+  }) {
+    return updateField(fieldId: fieldId, crop: crop);
   }
 
   static Future<Either<String, List<Field>>> getFields(String email) async {

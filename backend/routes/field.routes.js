@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post("/upload-image", fieldController.uploadFieldImage);
 router.post("/add", fieldController.addField);
-router.patch("/:fieldId", fieldController.updateFieldName);
+router.patch("/:fieldId", fieldController.updateField);
 router.get("/:email", fieldController.getFields);
 router.delete("/:fieldId", fieldController.deleteField);
 
