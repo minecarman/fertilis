@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../models/field.dart';
+import '../models/crop_catalog.dart';
 import '../models/yield_prediction.dart';
 import '../services/yield_service.dart';
 
@@ -17,18 +18,6 @@ class _YieldPageState extends State<YieldPage> {
   bool loading = false;
   String? error;
   YieldPrediction? result;
-
-  // Crop names mapping: English -> Turkish
-  final Map<String, String> cropNames = {
-    'Wheat': 'Buğday',
-    'Maize': 'Mısır',
-    'Rice': 'Pirinç',
-    'Soybean': 'Soya',
-    'Barley': 'Arpa',
-    'Oats': 'Yulaf',
-    'Rye': 'Çavdar',
-    'COARSE GRAINS': 'Iri Tahıllar',
-  };
 
   String? selectedCropEn; // English name for API
   final TextEditingController commodityController = TextEditingController();
@@ -106,7 +95,7 @@ class _YieldPageState extends State<YieldPage> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.agriculture),
                   ),
-                  items: cropNames.entries.map((entry) {
+                  items: getPossibleCropChoices().map((entry) {
                     return DropdownMenuItem(
                       value: entry.key,
                       child: Text(entry.value),
@@ -194,7 +183,7 @@ class _YieldPageState extends State<YieldPage> {
 
   Widget _buildResult(YieldPrediction data) {
     final prediction = data.prediction;
-    final cropTr = cropNames[prediction.commodity] ?? prediction.commodity;
+    final cropTr = translateCropName(prediction.commodity);
     
     // Trend info
     Color trendColor = Colors.grey;
