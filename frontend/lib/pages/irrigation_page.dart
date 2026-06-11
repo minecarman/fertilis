@@ -2,7 +2,47 @@ import 'package:flutter/material.dart';
 import '../services/irrigation_service.dart';
 import '../models/irrigation_data.dart';
 import '../models/field.dart';
+import '../models/crop_catalog.dart';
 import '../core/theme.dart';
+
+const Map<String, int> _cropIrrigationDays = {
+  'almond': 10,
+  'apple': 10,
+  'banana': 3,
+  'barley': 14,
+  'blackgram': 12,
+  'chickpea': 15,
+  'citrus': 10,
+  'coconut': 7,
+  'coffee': 10,
+  'cotton': 14,
+  'fig': 14,
+  'grape': 14,
+  'hazelnut': 10,
+  'jute': 7,
+  'kidneybeans': 7,
+  'lentil': 15,
+  'maize': 7,
+  'mango': 14,
+  'mothbeans': 20,
+  'mungbean': 12,
+  'muskmelon': 7,
+  'olive': 20,
+  'onion': 5,
+  'orange': 10,
+  'papaya': 4,
+  'pigeonpeas': 15,
+  'pomegranate': 14,
+  'potato': 5,
+  'rice': 2,
+  'sugarbeet': 10,
+  'sugarcane': 10,
+  'sunflower': 14,
+  'tea': 7,
+  'tomato': 5,
+  'watermelon': 10,
+  'wheat': 15,
+};
 
 class IrrigationPage extends StatefulWidget {
   final Field field; // HomePage'den gelen tarla
@@ -17,18 +57,95 @@ class _IrrigationPageState extends State<IrrigationPage> {
   bool loading = false;
   IrrigationData? resultStr;
   String? errorStr;
+  final TextEditingController _lastIrrigatedController = TextEditingController();
+
+  bool get _cropMissing => normalizeCropName(widget.field.crop) == null;
+
+  @override
+  void dispose() {
+    _lastIrrigatedController.dispose();
+    super.dispose();
+  }
+
+  int? _parseLastIrrigatedDays() {
+    final raw = _lastIrrigatedController.text.trim();
+    if (raw.isEmpty) return null;
+    return int.tryParse(raw);
+  }
+
+  int _recommendedDaysForCrop(String cropKey) {
+    return _cropIrrigationDays[cropKey] ?? 7;
+  }
+
+  IrrigationData _buildNoIrrigationResult(String cropKey, int lastIrrigatedDays, int recommendedDays) {
+    return IrrigationData(
+      rain: '0.00',
+      decision: 'Sulama gereksiz',
+      mode: 'local-threshold',
+      soilType: 'local',
+      crop: cropKey,
+      amc: '-',
+      rawRainMm: 0,
+      et0Mm: 0,
+      effectiveRainMm: 0,
+      cropWaterLossMm: 0,
+      baseIrrigationMm: 0,
+      irrigationMm: 0,
+      recommendedIrrigationDays: recommendedDays,
+      lastIrrigatedDays: lastIrrigatedDays,
+      timingFactor: 0,
+      weatherSource: 'local-threshold',
+      scheduleStatus: 'Sulama gereksiz',
+    );
+  }
 
   Future<void> analyze() async {
+    if (_cropMissing) {
+      setState(() {
+        errorStr = "Bu tarla için önce ekin seçin. Sulama analizini başlatmak için crop gereklidir.";
+      });
+      return;
+    }
+
+    final lastIrrigatedDays = _parseLastIrrigatedDays();
+    final cropKey = normalizeCropName(widget.field.crop);
+
+    if (cropKey == null) {
+      setState(() {
+        errorStr = "Bu tarla için önce ekin seçin. Sulama analizini başlatmak için crop gereklidir.";
+      });
+      return;
+    }
+
+    if (lastIrrigatedDays == null || lastIrrigatedDays < 0) {
+      setState(() {
+        errorStr = "Lütfen son sulamayı gün cinsinden girin.";
+      });
+      return;
+    }
+
+    final recommendedDays = _recommendedDaysForCrop(cropKey);
+
+    if (lastIrrigatedDays < recommendedDays) {
+      setState(() {
+        loading = false;
+        resultStr = _buildNoIrrigationResult(cropKey, lastIrrigatedDays, recommendedDays);
+        errorStr = null;
+      });
+      return;
+    }
+
     setState(() {
       loading = true;
       resultStr = null;
       errorStr = null;
     });
 
-    // Artık seçili tarla kontrolüne gerek yok, widget.field doğrudan kullanılıyor
     final fetchResult = await IrrigationService.analyzeRain(
-      widget.field.center.latitude, 
-      widget.field.center.longitude
+      widget.field.center.latitude,
+      widget.field.center.longitude,
+      crop: cropKey,
+      lastIrrigatedDays: lastIrrigatedDays,
     );
 
     setState(() {
@@ -42,6 +159,11 @@ class _IrrigationPageState extends State<IrrigationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final cropKey = normalizeCropName(widget.field.crop);
+    final cropLabel = cropKey == null ? "Yok" : translateCropName(cropKey);
+    final hasRecommendation = resultStr != null;
+    final isIrrigationNeeded = hasRecommendation ? resultStr!.decision.toLowerCase().contains("gerekli") : false;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -57,12 +179,29 @@ class _IrrigationPageState extends State<IrrigationPage> {
               children: [
                 Icon(Icons.info_outline, color: AppTheme.mossGreen),
                 SizedBox(width: 12),
-                Expanded(child: Text("Seçili tarlanızın su ihtiyacı hesaplanır. Yeşil = Yeterli yağış, Turuncu = Sulama gerekli.")),
+                Expanded(child: Text("Seçili tarlanızın su ihtiyacı hesaplanır.")),
               ],
             ),
           ),
           
           const SizedBox(height: 20),
+
+          if (_cropMissing)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceMoss,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.errorClay),
+              ),
+              child: const Text(
+                "Bu tarlada ekin seçilmemiş. Sulama analizini kullanmak için önce ekin seçin.",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+
+          if (_cropMissing) const SizedBox(height: 16),
 
           Container(
             padding: const EdgeInsets.all(20),
@@ -98,12 +237,27 @@ class _IrrigationPageState extends State<IrrigationPage> {
                   ),
                 ),
 
+                const SizedBox(height: 12),
+                _detailRow("Ekin Türü", cropLabel),
+
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _lastIrrigatedController,
+                  keyboardType: TextInputType.number,
+                  enabled: !_cropMissing,
+                  decoration: const InputDecoration(
+                    labelText: "En son kaç gün önce suladın?",
+                    hintText: "Örn. 5",
+                    suffixText: "gün önce",
+                  ),
+                ),
+
                 const SizedBox(height: 20),
 
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: loading ? null : analyze,
+                    onPressed: loading || _cropMissing ? null : analyze,
                     icon: const Icon(Icons.water_drop),
                     label: const Text("Analiz Et"),
                   ),
@@ -121,10 +275,10 @@ class _IrrigationPageState extends State<IrrigationPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: resultStr!.irrigationMm <= 0 ? AppTheme.surfaceMoss : Colors.orange.withValues(alpha: 0.1),
+                color: !isIrrigationNeeded ? AppTheme.surfaceMoss : Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: resultStr!.irrigationMm <= 0 ? AppTheme.mossGreen : Colors.orange,
+                  color: !isIrrigationNeeded ? AppTheme.mossGreen : Colors.orange,
                   width: 2,
                 ),
               ),
@@ -135,25 +289,25 @@ class _IrrigationPageState extends State<IrrigationPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                        color: resultStr!.irrigationMm <= 0 
+                        color: !isIrrigationNeeded 
                           ? Colors.green.withValues(alpha: 0.1) 
                           : Colors.orange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: resultStr!.irrigationMm <= 0 ? Colors.green : Colors.orange,
+                        color: !isIrrigationNeeded ? Colors.green : Colors.orange,
                       ),
                     ),
                     child: Column(
                       children: [
                         Text(
-                          resultStr!.irrigationMm <= 0 ? "Sulama Gerekmez" : "Sulama Gerekli",
+                          isIrrigationNeeded ? "Sulama Gerekli" : "Sulama Gerekmez",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
-                            color: resultStr!.irrigationMm <= 0 ? Colors.green : Colors.orange[800],
+                            color: !isIrrigationNeeded ? Colors.green : Colors.orange[800],
                           ),
                         ),
-                        if (resultStr!.irrigationMm > 0) ...[
+                        if (isIrrigationNeeded) ...[
                           const SizedBox(height: 8),
                           Text(
                             "${resultStr!.irrigationMm.toStringAsFixed(0)} mm",
@@ -174,9 +328,8 @@ class _IrrigationPageState extends State<IrrigationPage> {
                   Column(
                     children: [
                       _detailRow("Ölçülen Yağış", "${resultStr!.rawRainMm.toStringAsFixed(1)} mm"),
-                      _detailRow("Buharlaşma (ET0)", "${resultStr!.et0Mm.toStringAsFixed(1)} mm"),
                       _detailRow("Bitki Su Kaybı", "${resultStr!.cropWaterLossMm.toStringAsFixed(1)} mm"),
-                      _detailRow("Efektif Yağış", "${resultStr!.effectiveRainMm.toStringAsFixed(1)} mm"),
+                      _detailRow("Son Sulama", "${resultStr!.lastIrrigatedDays} gün önce"),
                     ],
                   ),
 
@@ -188,9 +341,8 @@ class _IrrigationPageState extends State<IrrigationPage> {
                     runSpacing: 6,
                     alignment: WrapAlignment.center,
                     children: [
-                      _tag("Toprak", resultStr!.soilType),
-                      _tag("AMC", resultStr!.amc),
-                      _tag("Kaynak", resultStr!.weatherSource),
+                      _tag("Ekin", translateCropName(resultStr!.crop)),
+                      _tag("Kaynak", "open-meteo"),
                     ],
                   ),
                 ],

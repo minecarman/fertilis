@@ -6,7 +6,10 @@ import '../models/irrigation_data.dart';
 
 class IrrigationService {
   static Future<Either<String, IrrigationData>> analyzeRain(
-      double lat, double lon) async {
+      double lat, double lon, {
+      required String crop,
+      required int lastIrrigatedDays,
+    }) async {
     try {
       final response = await http.post(
         Uri.parse("${ApiConfig.baseUrl}/api/v1/irrigation"),
@@ -14,6 +17,8 @@ class IrrigationService {
         body: jsonEncode({
           "lat": lat,
           "lon": lon,
+          "crop": crop,
+          "last_irrigated_days": lastIrrigatedDays,
         }),
       );
 
