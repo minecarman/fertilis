@@ -71,7 +71,9 @@ class _YieldPageState extends State<YieldPage> {
                 Icon(Icons.insights, color: AppTheme.mossGreen),
                 SizedBox(width: 10),
                 Expanded(
-                  child: Text("Seçili tarlanız için ekin verimi tahmini yapın."),
+                  child: Text(
+                    "Seçili tarlanız için ekin verimi tahmini yapın.",
+                  ),
                 ),
               ],
             ),
@@ -113,7 +115,10 @@ class _YieldPageState extends State<YieldPage> {
                 // Field info
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.backgroundGrey,
                     border: Border.all(color: AppTheme.surfaceMoss),
@@ -128,7 +133,10 @@ class _YieldPageState extends State<YieldPage> {
                       ),
                       Text(
                         "Konum: ${widget.field.center.latitude.toStringAsFixed(2)}, ${widget.field.center.longitude.toStringAsFixed(2)}",
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -139,9 +147,13 @@ class _YieldPageState extends State<YieldPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: loading || selectedCropEn == null ? null : runPrediction,
-                    icon: loading ? const SizedBox.shrink() : const Icon(Icons.query_stats),
-                    label: loading 
+                    onPressed: loading || selectedCropEn == null
+                        ? null
+                        : runPrediction,
+                    icon: loading
+                        ? const SizedBox.shrink()
+                        : const Icon(Icons.query_stats),
+                    label: loading
                         ? const SizedBox(
                             height: 20,
                             width: 20,
@@ -154,7 +166,7 @@ class _YieldPageState extends State<YieldPage> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Error
           if (error != null)
             Container(
@@ -167,7 +179,10 @@ class _YieldPageState extends State<YieldPage> {
               ),
               child: Text(
                 error!,
-                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
 
@@ -183,13 +198,21 @@ class _YieldPageState extends State<YieldPage> {
 
   Widget _buildResult(YieldPrediction data) {
     final prediction = data.prediction;
+    final double area = widget.field.area; // hectares from DB
+    final double displayedPredicted = prediction.predictedProductionMt * area;
+    final double? displayedCurrent = prediction.currentProductionMt != null
+        ? prediction.currentProductionMt! * area
+        : null;
+    final double? displayedDelta = prediction.deltaMt != null
+        ? prediction.deltaMt! * area
+        : null;
     final cropTr = translateCropName(prediction.commodity);
-    
+
     // Trend info
     Color trendColor = Colors.grey;
     IconData trendIcon = Icons.trending_flat;
     String trendTr = 'Sabit';
-    
+
     if (prediction.trend == 'increase') {
       trendColor = Colors.green;
       trendIcon = Icons.trending_up;
@@ -217,19 +240,16 @@ class _YieldPageState extends State<YieldPage> {
           ),
           const SizedBox(height: 16),
 
-          // Main value
+          // Main value (scaled by area)
           Text(
-            prediction.predictedProductionMt.toStringAsFixed(1),
+            displayedPredicted.toStringAsFixed(1),
             style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
               color: AppTheme.wikilocGreen,
             ),
           ),
-          const Text(
-            "Ton/Hektar",
-            style: TextStyle(fontSize: 14, color: Colors.grey),
-          ),
+          const Text("Ton", style: TextStyle(fontSize: 14, color: Colors.grey)),
           const SizedBox(height: 16),
 
           // Trend badge
@@ -259,26 +279,34 @@ class _YieldPageState extends State<YieldPage> {
           const SizedBox(height: 16),
 
           // Details
-          if (prediction.currentProductionMt != null) ...[
+          if (displayedCurrent != null) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Mevcut Ortalama", style: TextStyle(fontSize: 13, color: Colors.grey)),
-                Text("${prediction.currentProductionMt!.toStringAsFixed(1)} T/H"),
+                const Text(
+                  "Mevcut Ortalama",
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+                Text("${displayedCurrent.toStringAsFixed(1)} Ton"),
               ],
             ),
             const SizedBox(height: 8),
           ],
 
-          if (prediction.deltaMt != null) ...[
+          if (displayedDelta != null) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Değişim", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                const Text(
+                  "Değişim",
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
                 Text(
-                  "${prediction.deltaMt!.toStringAsFixed(1)} T/H",
+                  "${displayedDelta.toStringAsFixed(1)} Ton",
                   style: TextStyle(
-                    color: (prediction.deltaMt ?? 0) > 0 ? Colors.green : Colors.red,
+                    color: (prediction.deltaMt ?? 0) > 0
+                        ? Colors.green
+                        : Colors.red,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -290,7 +318,10 @@ class _YieldPageState extends State<YieldPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Sezon", style: TextStyle(fontSize: 13, color: Colors.grey)),
+              const Text(
+                "Sezon",
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
               Text(prediction.latestSeason),
             ],
           ),

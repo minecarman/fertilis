@@ -21,6 +21,31 @@ class YieldPredictor:
         self.features = pipeline['features']
         self.df = pd.read_csv(data_path)
 
+    def _normalize_country(self, country):
+        text = str(country).strip()
+        aliases = {
+            'Turkey': 'Türkiye',
+            'Turkiye': 'Türkiye',
+            'Türkiye': 'Türkiye',
+        }
+        return aliases.get(text, text)
+
+    def _resolve_value(self, column, value):
+        text = str(value).strip()
+        if not text:
+            return text
+
+        candidates = self.df[column].dropna().astype(str)
+        exact_match = candidates[candidates == text]
+        if not exact_match.empty:
+            return exact_match.iloc[0]
+
+        normalized = candidates[candidates.str.lower() == text.lower()]
+        if not normalized.empty:
+            return normalized.iloc[0]
+
+        return text
+
     def _trend_text(self, diff):
         if diff > 0:
             return "increase"
@@ -29,6 +54,9 @@ class YieldPredictor:
         return "stable"
 
     def predict(self, country, commodity):
+        country = self._normalize_country(country)
+        country = self._resolve_value('Country/Region', country)
+        commodity = self._resolve_value('Commodity', commodity)
         subset = self.df[(self.df['Country/Region'] == country) & (self.df['Commodity'] == commodity)]
 
         if subset.empty:

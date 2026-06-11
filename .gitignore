@@ -4,3 +4,4 @@ ml_services/.env
 venv/
 .venv/
 __pycache__/
+ml_services/yield_recommendation/model/amis_model.joblib
