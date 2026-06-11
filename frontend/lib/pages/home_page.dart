@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:fpdart/fpdart.dart' hide State;
 import 'package:provider/provider.dart';
 import '../models/field.dart';
+import '../models/crop_catalog.dart';
 import '../core/theme.dart';
 import 'fields_page.dart';
 import 'chat_page.dart';
@@ -456,7 +457,7 @@ class _DashboardViewState extends State<DashboardView> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      field.crop!,
+                      translateCropName(field.crop!),
                       style: const TextStyle(
                         color: AppTheme.darkGreen,
                         fontWeight: FontWeight.bold,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 import '../models/field.dart';
+import '../models/crop_catalog.dart';
 import '../pages/fields_page.dart';
 import '../services/field_service.dart';
 import '../core/theme.dart';
@@ -85,30 +86,46 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
 
-    final cropController = TextEditingController(text: field.crop ?? "");
+    String? selectedCrop = normalizeCropName(field.crop);
+    final cropOptions = getPossibleCropChoices();
 
     final updatedCrop = await showDialog<String?>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Ekin türü ekle/düzenle"),
-        content: TextField(
-          controller: cropController,
-          decoration: const InputDecoration(
-            labelText: "Ekin Türü",
-            hintText: "Örn: Buğday, mısır, domates",
+      builder: (ctx) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text("Ekin türü seç"),
+          content: DropdownButtonFormField<String>(
+            value: selectedCrop,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: "Ekin Türü",
+              hintText: "Listeden bir seçenek seçin",
+            ),
+            items: cropOptions
+                .map(
+                  (entry) => DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(entry.value),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              setDialogState(() {
+                selectedCrop = value;
+              });
+            },
           ),
-          textInputAction: TextInputAction.done,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, null),
+              child: const Text("İptal"),
+            ),
+            ElevatedButton(
+              onPressed: selectedCrop == null ? null : () => Navigator.pop(ctx, selectedCrop),
+              child: const Text("Kaydet"),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, null),
-            child: const Text("İptal"),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, cropController.text),
-            child: const Text("Kaydet"),
-          ),
-        ],
       ),
     );
 
@@ -318,7 +335,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             title: Text(field.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                             subtitle: Text(
                               field.crop != null && field.crop!.trim().isNotEmpty
-                                  ? "${field.calculatedArea.toStringAsFixed(1)} ha • ${field.crop}"
+                                      ? "${field.calculatedArea.toStringAsFixed(1)} ha • ${translateCropName(field.crop!)}"
                                   : "${field.calculatedArea.toStringAsFixed(1)} ha",
                             ),
                             trailing: Row(

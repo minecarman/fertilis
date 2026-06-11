@@ -1,3 +1,5 @@
+import 'crop_catalog.dart';
+
 class Recommendation {
   final String rawName;
   final String displayName;
@@ -16,49 +18,7 @@ class Recommendation {
   });
 
   static String translate(String name) {
-    const translations = {
-      'almond': 'Badem',
-      'apple': 'Elma',
-      'banana': 'Muz',
-      'barley': 'Arpa',
-      'blackgram': 'Kara Maş Fasulyesi',
-      'chickpea': 'Nohut',
-      'citrus': 'Narenciye',
-      'coconut': 'Hindistan Cevizi',
-      'coffee': 'Kahve',
-      'cotton': 'Pamuk',
-      'fig': 'İncir',
-      'grape': 'Üzüm',
-      'grapes': 'Üzüm',
-      'hazelnut': 'Fındık',
-      'jute': 'Jüt (Lif)',
-      'kidneybeans': 'Barbunya',
-      'lentil': 'Mercimek',
-      'maize': 'Mısır',
-      'mango': 'Mango',
-      'mothbeans': 'Güve Fasulyesi',
-      'mungbean': 'Maş Fasulyesi',
-      'muskmelon': 'Kavun',
-      'olive': 'Zeytin',
-      'onion': 'Soğan',
-      'orange': 'Portakal',
-      'papaya': 'Papaya',
-      'pigeonpeas': 'Güvercin Bezelyesi',
-      'pomegranate': 'Nar',
-      'potato': 'Patates',
-      'rice': 'Çeltik (Pirinç)',
-      'sugarbeet': 'Şeker Pancarı',
-      'sugarcane': 'Şeker Kamışı',
-      'sunflower': 'Ayçiçeği',
-      'tea': 'Çay',
-      'tomato': 'Domates',
-      'watermelon': 'Karpuz',
-      'wheat': 'Buğday',
-    };
-
-    String key = name.toLowerCase().trim();
-    if (translations.containsKey(key)) return translations[key]!;
-    return name[0].toUpperCase() + name.substring(1).toLowerCase();
+    return translateCropName(name);
   }
 
   static List<Recommendation> fromJsonList(List<dynamic> jsonList) {
@@ -92,7 +52,7 @@ class Recommendation {
 
       return Recommendation(
         rawName: name,
-        displayName: translate(name),
+        displayName: translateCropName(name),
         rank: idx + 1,
         recommendationRate: recommendationRate,
         description: recommendationDesc,
