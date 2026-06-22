@@ -48,10 +48,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 DATA_DIR = PROJECT_ROOT / "data"
 MODELS_DIR = PROJECT_ROOT / "models"
 REPORTS_DIR = PROJECT_ROOT / "reports"
-DATA_FILE = DATA_DIR / "seasonal_crop_dataset.csv"
+DATA_FILE = DATA_DIR / "Crop_recommendation.csv"
 
 # ── Config ─────────────────────────────────────────────────────────────────────
-FEATURES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall", "season_length", "altitude"]
+FEATURES = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
 TARGET = "label"
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
@@ -62,12 +62,28 @@ CV_FOLDS = 5
 #  DATA PROCESSING
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def load_and_preprocess_data(file_path: str) -> pd.DataFrame:
+    df = pd.read_csv(file_path)
+    
+    # Check if newly mined real-world data exists and merge it
+    additional_data_path = Path(file_path).parent / "real_world_additional_crops.csv"
+    if additional_data_path.exists():
+        print(f"Merging genuine mined real-world data from {additional_data_path}")
+        df_new = pd.read_csv(additional_data_path)
+        df = pd.concat([df, df_new], ignore_index=True)
+    
+    missing_cols = [col for col in FEATURES + [TARGET] if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Missing required columns in dataset: {missing_cols}")
+        
+    return df[FEATURES + [TARGET]].dropna()
+
 def load_data() -> pd.DataFrame:
     if not DATA_FILE.exists():
-        print(f" Dataset not found at {DATA_FILE}. Run 'python generate_fao_simulated_data.py'.")
+        print(f" Dataset not found at {DATA_FILE}. Run the download script first.")
         sys.exit(1)
 
-    df = pd.read_csv(DATA_FILE)
+    df = load_and_preprocess_data(DATA_FILE)
     print(f" Loaded {len(df)} samples across {df[TARGET].nunique()} crops")
     return df
 

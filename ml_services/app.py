@@ -70,9 +70,9 @@ def resolve_country_from_coordinates(lat: float, lng: float) -> Optional[str]:
 def normalize_country_name(country: str) -> str:
     normalized = country.strip()
     aliases = {
-        "Turkey": "Türkiye",
-        "Turkiye": "Türkiye",
-        "Türkiye": "Türkiye",
+        "Turkey": "T\u00fcrkiye",
+        "Turkiye": "T\u00fcrkiye",
+        "T\u00fcrkiye": "T\u00fcrkiye",
     }
     return aliases.get(normalized, normalized)
 
@@ -118,44 +118,25 @@ def load_crop_days() -> dict:
 
 CROP_IRRIGATION_DAYS = load_crop_days()
 
-CROP_KC_BY_NAME = {
-    "almond": 0.85,
-    "apple": 0.90,
-    "banana": 1.15,
-    "barley": 1.10,
-    "blackgram": 1.00,
-    "chickpea": 0.95,
-    "citrus": 0.80,
-    "coconut": 1.00,
-    "coffee": 1.00,
-    "cotton": 1.15,
-    "fig": 0.85,
-    "grape": 0.90,
-    "hazelnut": 0.85,
-    "jute": 1.05,
-    "kidneybeans": 1.00,
-    "lentil": 0.95,
-    "maize": 1.20,
-    "mango": 0.95,
-    "mothbeans": 1.00,
-    "mungbean": 0.95,
-    "muskmelon": 1.05,
-    "olive": 0.75,
-    "onion": 0.90,
-    "orange": 0.80,
-    "papaya": 1.00,
-    "pigeonpeas": 0.95,
-    "pomegranate": 0.85,
-    "potato": 1.15,
-    "rice": 1.20,
-    "sugarbeet": 1.05,
-    "sugarcane": 1.20,
-    "sunflower": 0.95,
-    "tea": 0.90,
-    "tomato": 1.15,
-    "watermelon": 1.05,
-    "wheat": 1.10,
-}
+def load_crop_kc() -> dict:
+    """Load crop coefficients: both single Kc and basal Kcb for dual coefficient mode."""
+    kc_path = Path(__file__).parent / "irrigation" / "data" / "crop_kc.csv"
+    kc_data = {}
+    try:
+        with kc_path.open("r", encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                crop_key = row.get("crop")
+                if crop_key:
+                    kc_data[crop_key] = {
+                        "kc": float(row.get("kc", 1.0)),
+                        "kcb": float(row.get("kcb", float(row.get("kc", 1.0)) - 0.15)),
+                    }
+    except FileNotFoundError:
+        print(f"Warning: crop kc database not found at {kc_path}")
+    return kc_data
+
+CROP_KC_BY_NAME = load_crop_kc()
 
 
 def _irrigation_decision(irrigation_mm: float) -> str:
@@ -165,21 +146,25 @@ def _irrigation_decision(irrigation_mm: float) -> str:
         return "Az miktarda sulama yap"
     return "Sulama gerekli"
 
+def load_planting_calendar() -> dict:
+    calendar_path = Path(__file__).parent / "crop_recommendation" / "data" / "planting_calendar.csv"
+    calendar_data = {}
+    try:
+        with calendar_path.open("r", encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                crop_key = normalize_crop_name(row.get("crop"))
+                if crop_key:
+                    calendar_data[crop_key] = row.get("calendar", "")
+    except FileNotFoundError:
+        print(f"Warning: planting calendar not found at {calendar_path}")
+    return calendar_data
+
+PLANTING_CALENDAR = load_planting_calendar()
+
 def get_planting_calendar(crop_name):
-    # Basist Ekim takvimi kurali
-    calendar = {
-        'wheat': 'Buğday: (Kışlık) için Eylül sonu - Kasım arası, (Yazlık) ise don tehlikesi geçtikten sonra Şubat - Mart aylarında.',
-        'barley': 'Arpa: Kışlık arpa olarak Ekim ortası - Kasım aylarında ekimi tavsiye edilir.',
-        'olive': 'Zeytin: Fidan dikimi genelde don tehlikesi geçtikten sonra Şubat - Mart (kurak bölgelerde sonbaharda) yapılır.',
-        'fig': 'İncir: Uykuda olduğu kış sonu (Şubat-Mart) dikim için idealdir.',
-        'citrus': 'Narenciye: İlkbaharda don riski bitince (Mart-Nisan) dikimi daha emniyetlidir.',
-        'mango': 'Mango: Sıcacık ve ilkbahar yağış başlangıcı / tropikal mevsim dönümleri.',
-        'chickpea': 'Nohut: İlkbaharda (Mart sonu-Nisan) toprak ısındıktan sonra ekilir.',
-        'lentil': 'Mercimek: Kışlık mercimek için Ekim, yazlık için Şubat-Mart uygundur.',
-        'grape': 'Üzüm/Bağ: Fidan (çelik) dikimi kış dinlenmesinde, Şubat ya da Mart ayında yapılmalıdır.',
-        'cotton': 'Pamuk: Toprak sıcaklığı 15 derece civarındayken, Nisan ortasından Mayıs başına kadar ekilir.'
-    }
-    return calendar.get(crop_name, "Genellikle ilkbaharda, don tehlikesi geçtikten sonra ekimi tavsiye edilir.")
+    normalized = normalize_crop_name(crop_name)
+    return PLANTING_CALENDAR.get(normalized, "Genellikle ilkbaharda, don tehlikesi geçtikten sonra ekimi tavsiye edilir.")
 
 @app.post("/recommend_by_location")
 def recommend_by_location(data: LocationRequest):
@@ -189,10 +174,9 @@ def recommend_by_location(data: LocationRequest):
         features = get_soil_and_climate_data(data.lat, data.lng)
         
         result = recommender.predict(
-            N=features["N"], P=features["P"], K=features["K"], ph=features["ph"],
-            temp_summer=features["temp_summer"], temp_winter=features["temp_winter"],
-            rain_summer=features["rain_summer"], rain_winter=features["rain_winter"],
-            altitude=features["altitude"]
+            N=features["N"], P=features["P"], K=features["K"], 
+            temperature=features["temperature"], humidity=features["humidity"],
+            ph=features["ph"], rainfall=features["rainfall"]
         )
         
         # Add planting calendar info directly into the array returned to Node
@@ -210,11 +194,22 @@ def recommend_by_location(data: LocationRequest):
 
 @app.post("/irrigation/recommend")
 def recommend_irrigation(data: IrrigationRequest):
+    """
+    Core API Endpoint for calculating Precision Irrigation Recommendations.
+    
+    This orchestrates the physical hydrology calculations by:
+    1. Looking up crop-specific physiological data (Base Kc, Transpiration coefficients, irrigation thresholds).
+    2. Looking up physical soil properties (Curve Number, Field Capacity, Wilting Point).
+    3. Querying real-time satellite environmental data (ET0, Rainfall, Volumetric Water Content) via Open-Meteo or NASA POWER.
+    4. Passing the aggregated datasets into the FAO-56 Dual Crop Coefficient physical engine.
+    """
     try:
+        # Step 1: Normalize and fetch crop static tables
         crop_key = normalize_crop_name(data.crop) or "tomato"
         recommended_days = CROP_IRRIGATION_DAYS.get(crop_key, 7)
         last_irrigated_days = max(0, int(data.last_irrigated_days))
 
+        # Step 2: Resolve soil physical parameters
         soil_map = {name.lower(): name for name in SOIL_DATABASE.keys()}
         soil_key = soil_map.get(data.soil_type.lower())
         if not soil_key:
@@ -224,9 +219,12 @@ def recommend_irrigation(data: IrrigationRequest):
         if mode not in {"Hybrid", "Strict"}:
             raise HTTPException(status_code=400, detail="mode must be 'Hybrid' or 'Strict'")
 
+        # Step 3: Fetch Environmental Telemetry (Live weather, ET0, Satellite Soil Moisture)
         orchestrator = DataOrchestrator(lat=data.lat, lon=data.lng)
         weather_data = orchestrator.fetch_weather_package()
         weather_source = "open-meteo"
+        
+        # Fallback to NASA POWER if primary meteorology source fails
         if not weather_data:
             weather_data = orchestrator.fetch_nasa_fallback()
             weather_source = "nasa-power"
@@ -234,29 +232,40 @@ def recommend_irrigation(data: IrrigationRequest):
         if not weather_data:
             raise HTTPException(status_code=503, detail="Could not fetch weather data from providers")
 
-        crop_kc = data.crop_kc if data.crop_kc is not None else CROP_KC_BY_NAME.get(crop_key, 1.15)
-        engine = IrrigationEngine(crop_kc=crop_kc, soil_type=soil_key)
+        # Step 4: Resolve biological coefficients for the specific crop
+        crop_coeffs = CROP_KC_BY_NAME.get(crop_key, {"kc": 1.15, "kcb": 1.00})
+        if data.crop_kc is not None:
+            # User explicitly provided a single Kc override — mathematically derive Kcb
+            crop_kc = data.crop_kc
+            crop_kcb = max(0.1, crop_kc - 0.15)
+        else:
+            crop_kc = crop_coeffs["kc"]
+            crop_kcb = crop_coeffs["kcb"]
+
+        # Step 5: Execute the physical calculation engine
+        engine = IrrigationEngine(crop_kcb=crop_kcb, crop_kc=crop_kc, soil_type=soil_key)
         result = engine.run_fao56_logic(weather_data, mode=mode, verbose=False)
+        
+        # Step 6: Decorate the final JSON response with metadata for the Flutter client
         result["weather_source"] = weather_source
         result["crop"] = crop_key
         result["crop_kc"] = round(float(crop_kc), 2)
+        result["crop_kcb"] = round(float(crop_kcb), 3)
         result["recommended_irrigation_days"] = recommended_days
         result["last_irrigated_days"] = last_irrigated_days
 
         base_irrigation = float(result["irrigation_mm"])
 
-        if last_irrigated_days < recommended_days:
-            personalized_irrigation = 0.0
-            schedule_status = "Sulama gereksiz"
-            timing_factor = 0.0
-            decision = "Bugun sulamaya gerek yok"
-        else:
-            overdue_days = max(0, last_irrigated_days - recommended_days)
-            threshold_amount = 2.0 + (overdue_days * 0.75)
-            personalized_irrigation = round(max(base_irrigation, threshold_amount), 2)
+        # Determine binary decision string based on mathematical outputs
+        personalized_irrigation = round(base_irrigation, 2)
+        decision = result.get("decision", "Sulama gerekli" if personalized_irrigation > 0 else "Bugun sulamaya gerek yok")
+        
+        if personalized_irrigation > 0:
             schedule_status = "Sulama gerekli"
             timing_factor = 1.0
-            decision = "Sulama gerekli"
+        else:
+            schedule_status = "Sulama gereksiz"
+            timing_factor = 0.0
 
         result["base_irrigation_mm"] = round(base_irrigation, 2)
         result["timing_factor"] = round(timing_factor, 2)

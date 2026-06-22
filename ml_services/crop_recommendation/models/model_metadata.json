@@ -1,21 +1,16 @@
 {
   "model_type": "XGBoost Classifier",
   "dataset_type": "Realistic FAO/ISRIC Simulated (Noisy/Overlapped)",
-  "accuracy": 0.9346,
+  "accuracy": 0.9784,
   "crops": [
-    "almond",
     "apple",
     "banana",
-    "barley",
     "blackgram",
     "chickpea",
-    "citrus",
     "coconut",
     "coffee",
     "cotton",
-    "fig",
-    "grape",
-    "hazelnut",
+    "grapes",
     "jute",
     "kidneybeans",
     "lentil",
@@ -24,33 +19,22 @@
     "mothbeans",
     "mungbean",
     "muskmelon",
-    "olive",
-    "onion",
     "orange",
     "papaya",
     "pigeonpeas",
     "pomegranate",
-    "potato",
     "rice",
-    "sugarbeet",
-    "sugarcane",
-    "sunflower",
-    "tea",
-    "tomato",
-    "watermelon",
-    "wheat"
+    "watermelon"
   ],
-  "num_crops": 36,
+  "num_crops": 22,
   "features": [
     "N",
     "P",
     "K",
+    "temperature",
+    "humidity",
     "ph",
-    "temp_summer",
-    "temp_winter",
-    "rain_summer",
-    "rain_winter",
-    "altitude"
+    "rainfall"
   ],
-  "trained_at": "2026-04-09T01:32:44.439424"
+  "trained_at": "2026-06-22T15:00:29.712549"
 }

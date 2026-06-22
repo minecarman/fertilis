@@ -1,26 +1,42 @@
 import requests
 from datetime import datetime, timedelta
+import csv
+from pathlib import Path
 
-# 1. HARDCODED DATABASES
-CROP_DATABASE = {
-    "Tomatoes": {"initial": 0.60, "mid": 1.15, "late": 0.80},
-    "Maize (Corn)": {"initial": 0.30, "mid": 1.20, "late": 0.35},
-    "Potatoes": {"initial": 0.50, "mid": 1.15, "late": 0.75},
-    "Wheat": {"initial": 0.30, "mid": 1.15, "late": 0.25},
-    "Citrus Trees": {"initial": 0.75, "mid": 0.75, "late": 0.75}
-}
+def load_soil_database():
+    """Load soil physical properties needed for both CN and Ke calculations.
+    
+    Returns dict: { "Clay": { "cn": 85, "tew": 14.0, "rew": 6.0, "fc": 0.36, "wp": 0.17 }, ... }
+    """
+    db_path = Path(__file__).parent / "data" / "soil_database.csv"
+    soil_db = {}
+    try:
+        with db_path.open("r", encoding="utf-8", newline="") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                soil_key = row.get("soil")
+                if soil_key:
+                    soil_db[soil_key] = {
+                        "cn": int(row.get("cn", 80)),
+                        "tew": float(row.get("tew", 12.0)),
+                        "rew": float(row.get("rew", 5.0)),
+                        "fc": float(row.get("fc", 0.28)),
+                        "wp": float(row.get("wp", 0.10)),
+                    }
+    except FileNotFoundError:
+        print(f"Warning: soil database not found at {db_path}")
+    return soil_db
 
-SOIL_DATABASE = {
-    "Sand": 65,
-    "Loam": 80,
-    "Clay": 85
-}
+SOIL_DATABASE = load_soil_database()
 
 
 def _safe_last(values, default=0.0):
     if not values:
         return default
-    return values[-1]
+    valid_values = [v for v in values if v is not None]
+    if not valid_values:
+        return default
+    return valid_values[-1]
 
 
 def _irrigation_decision(irrigation_mm):
@@ -29,6 +45,7 @@ def _irrigation_decision(irrigation_mm):
     if irrigation_mm < 2:
         return "Az miktarda sulama yap"
     return "Sulama gerekli"
+
 
 # 2. DATA ORCHESTRATOR
 class DataOrchestrator:
@@ -75,13 +92,108 @@ class DataOrchestrator:
         except:
             return None
 
-# 3. FAO-56 & EFFECTIVE RAIN CALCULATOR
-class IrrigationEngine:
-    def __init__(self, crop_kc, soil_type):
-        self.kc = crop_kc
-        self.soil_type = soil_type
-        self.base_cn = SOIL_DATABASE.get(soil_type, 80)
 
+# 3. FAO-56 DUAL CROP COEFFICIENT ENGINE
+class IrrigationEngine:
+    """Implements FAO-56 Dual Crop Coefficient (Kcb + Ke) with USDA-SCS Curve Number runoff.
+
+    The single Kc approach lumps plant transpiration and soil evaporation together.
+    The dual approach separates them:
+        ETc = (Kcb + Ke) * ET0
+
+    where:
+        Kcb = Basal crop coefficient (transpiration only, from crop tables)
+        Ke  = Soil evaporation coefficient (calculated from live soil moisture)
+        ET0 = Reference evapotranspiration (from satellite/weather API)
+
+    Ke is bounded by:  0 <= Ke <= few * Kc_max
+    and reduced by Kr when the topsoil dries out below REW.
+
+    References:
+        FAO Irrigation & Drainage Paper 56, Chapter 7 (Eq. 71-79)
+        USDA-SCS National Engineering Handbook, Part 630
+    """
+
+    def __init__(self, crop_kcb, crop_kc, soil_type):
+        self.kcb = crop_kcb          # Basal crop coefficient (transpiration only)
+        self.kc = crop_kc            # Single Kc (used as Kc_max ceiling & fallback)
+        self.soil_type = soil_type
+
+        soil_props = SOIL_DATABASE.get(soil_type, {})
+        self.base_cn = soil_props.get("cn", 80)
+        self.tew = soil_props.get("tew", 12.0)   # Total Evaporable Water (mm)
+        self.rew = soil_props.get("rew", 5.0)     # Readily Evaporable Water (mm)
+        self.fc = soil_props.get("fc", 0.28)       # Field Capacity (m3/m3)
+        self.wp = soil_props.get("wp", 0.10)       # Wilting Point (m3/m3)
+
+    # -----------------------------------------------------------------
+    #  Ke Calculation  (FAO-56 Eq. 71-79)
+    # -----------------------------------------------------------------
+    def calculate_ke(self, et0, soil_moisture_vwc):
+        """Calculate the soil evaporation coefficient Ke from live soil moisture.
+
+        FAO-56 Chapter 7 defines:
+            Ke = Kr * (Kc_max - Kcb)   bounded by   Ke <= few * Kc_max
+
+        where:
+            Kc_max = upper limit on (Kcb + Ke), typically max(1.2, Kcb + 0.05)
+            few    = fraction of soil that is both exposed and wetted (0.01 - 1.0)
+            Kr     = evaporation reduction coefficient (1.0 when wet, drops to 0 when dry)
+        """
+        if et0 <= 0:
+            return 0.0, {}
+
+        # Kc_max: FAO-56 Eq. 72 — upper limit on evapotranspiration
+        kc_max = max(1.20, self.kcb + 0.05)
+
+        # few: fraction of soil surface that is both exposed and wetted
+        # For surface irrigation / rain, assume ~0.6-0.8 of soil surface is wetted.
+        # For drip, this would be much lower (~0.3). Default to rain/sprinkler.
+        fc_fraction = min(1.0, max(0.01, self.kcb / kc_max))  # approximate canopy fraction
+        few = max(0.01, min(1.0, 1.0 - fc_fraction))
+
+        # Kr: evaporation reduction coefficient (FAO-56 Eq. 74)
+        # Estimate topsoil depletion (De) from live VWC sensor data.
+        # De = 0 when soil is at field capacity, De = TEW when completely dry.
+        if self.fc <= self.wp:
+            # Degenerate soil data — fall back to Kr = 1.0
+            kr = 1.0
+            de = 0.0
+        else:
+            # Map the volumetric water content to depletion
+            # When VWC = FC → De = 0 (fully wet topsoil)
+            # When VWC = WP → De = TEW (bone dry topsoil)
+            vwc_clamped = max(self.wp, min(self.fc, soil_moisture_vwc))
+            fraction_depleted = 1.0 - (vwc_clamped - self.wp) / (self.fc - self.wp)
+            de = fraction_depleted * self.tew
+
+            # FAO-56 Eq. 74: Kr = (TEW - De) / (TEW - REW)
+            if de <= self.rew:
+                # Soil is still wet enough — no reduction
+                kr = 1.0
+            elif self.tew <= self.rew:
+                kr = 0.0
+            else:
+                kr = max(0.0, (self.tew - de) / (self.tew - self.rew))
+
+        # Ke: FAO-56 Eq. 71
+        ke_energy = kr * (kc_max - self.kcb)
+        ke_limit = few * kc_max
+        ke = max(0.0, min(ke_energy, ke_limit))
+
+        debug = {
+            "kc_max": round(kc_max, 3),
+            "few": round(few, 3),
+            "kr": round(kr, 3),
+            "de_mm": round(de, 2),
+            "ke_energy": round(ke_energy, 3),
+            "ke_limit": round(ke_limit, 3),
+        }
+        return ke, debug
+
+    # -----------------------------------------------------------------
+    #  AMC & Effective Rain  (unchanged from single-Kc version)
+    # -----------------------------------------------------------------
     def get_amc_condition(self, weather_data, mode):
         if not weather_data:
             return "II", 0.0
@@ -94,7 +206,9 @@ class IrrigationEngine:
             return "II", latest_vwc
         
         if "daily" in weather_data:
-            total_rain = float(sum(weather_data.get('daily', {}).get('precipitation_sum', [])))
+            rain_values = weather_data.get('daily', {}).get('precipitation_sum', [])
+            valid_rains = [r for r in rain_values if r is not None]
+            total_rain = float(sum(valid_rains))
             if total_rain < 13: return "I", total_rain
             if total_rain > 38: return "III", total_rain
         return "II", 0.0
@@ -119,6 +233,9 @@ class IrrigationEngine:
             return max(0.0, rain_mm)
         return max(0.0, rain_mm - (((rain_mm - ia) ** 2) / denominator))
 
+    # -----------------------------------------------------------------
+    #  Main Engine: Dual Coefficient Logic
+    # -----------------------------------------------------------------
     def run_fao56_logic(self, weather_data, mode="Hybrid", verbose=False):
         daily_data = weather_data.get('daily', {}) if weather_data else {}
         dates = daily_data.get('time', [])
@@ -129,25 +246,54 @@ class IrrigationEngine:
         et0 = float(_safe_last(et0_values, 0.0))
         amc, sensor_val = self.get_amc_condition(weather_data, mode)
 
-        # Calculations
+        # Get live soil moisture for Ke calculation
+        soil_moisture_vwc = 0.0
+        if mode == "Hybrid" and weather_data and "hourly" in weather_data:
+            moisture_values = weather_data.get('hourly', {}).get('soil_moisture_0_to_10cm', [])
+            soil_moisture_vwc = float(_safe_last(moisture_values, self.fc))
+        else:
+            # No live sensor → assume field capacity (Ke will be maximized, conservative)
+            soil_moisture_vwc = self.fc
+
+        # --- DUAL COEFFICIENT CALCULATION ---
+        # Kcb: basal transpiration (from crop tables)
+        kcb_used = self.kcb
+
+        # Ke: soil evaporation (calculated from live soil moisture)
+        ke, ke_debug = self.calculate_ke(et0, soil_moisture_vwc)
+
+        # ETc = (Kcb + Ke) * ET0
+        transpiration_mm = kcb_used * et0
+        evaporation_mm = ke * et0
+        crop_water_loss = transpiration_mm + evaporation_mm
+
+        # Effective rainfall (USDA CN, unchanged)
         eff_rain = self.calculate_effective_rain(raw_rain, amc)
-        crop_water_loss = et0 * self.kc
+
+        # Net irrigation requirement
         irrigation_needed = max(0.0, crop_water_loss - eff_rain)
 
         result = {
             "mode": mode,
+            "method": "FAO-56 Dual Crop Coefficient",
             "soil_type": self.soil_type,
             "amc": amc,
             "amc_reference": round(float(sensor_val), 4),
             "raw_rain_mm": round(raw_rain, 2),
             "et0_mm": round(et0, 2),
             "effective_rain_mm": round(eff_rain, 2),
+            "kcb": round(kcb_used, 3),
+            "ke": round(ke, 3),
+            "kc_effective": round(kcb_used + ke, 3),
+            "transpiration_mm": round(transpiration_mm, 2),
+            "evaporation_mm": round(evaporation_mm, 2),
             "crop_water_loss_mm": round(crop_water_loss, 2),
             "irrigation_mm": round(irrigation_needed, 2),
             "decision": _irrigation_decision(irrigation_needed),
+            "ke_debug": ke_debug,
             "history": {
                 "dates": dates,
-                "rains_mm": [round(float(r), 2) for r in rains],
+                "rains_mm": [round(float(r), 2) for r in rains if r is not None],
             },
         }
 
@@ -156,21 +302,30 @@ class IrrigationEngine:
             if len(rains) > 1:
                 print("5-Day Rainfall History:")
                 for d, r in zip(dates, rains):
-                    print(f"  > {d}: {r} mm")
+                    if r is not None:
+                        print(f"  > {d}: {r} mm")
             else:
                 print(f"  Yesterday's Rain: {raw_rain} mm")
 
             if mode == "Hybrid":
-                print(f"  Latest Soil Moisture: {sensor_val} m3/m3")
+                print(f"  Latest Soil Moisture: {soil_moisture_vwc:.3f} m3/m3")
             else:
                 print(f"  5-Day Total Rain for AMC: {sensor_val} mm")
 
-            print("\nAPP DASHBOARD: FAO-56 & USDA ENGINE")
+            print("\nFAO-56 DUAL COEFFICIENT ENGINE")
             print(f"Mode: {mode} | Soil: {self.soil_type} | AMC: {amc}")
-            print(f"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-            print(f"Reference ET0:       {result['et0_mm']} mm")
-            print(f"Effective Rain:     -{result['effective_rain_mm']} mm")
-            print(f"WATER TO DISPENSE:   {result['irrigation_mm']} mm")
+            print(f"{'='*45}")
+            print(f"Reference ET0:           {result['et0_mm']:>8.2f} mm")
+            print(f"Kcb (Transpiration):     {result['kcb']:>8.3f}")
+            print(f"Ke  (Soil Evaporation):  {result['ke']:>8.3f}")
+            print(f"Kc  (Effective Total):   {result['kc_effective']:>8.3f}")
+            print(f"{'─'*45}")
+            print(f"Plant Transpiration:     {result['transpiration_mm']:>8.2f} mm")
+            print(f"Soil Evaporation:        {result['evaporation_mm']:>8.2f} mm")
+            print(f"Total Crop Water Loss:   {result['crop_water_loss_mm']:>8.2f} mm")
+            print(f"Effective Rain:         -{result['effective_rain_mm']:>8.2f} mm")
+            print(f"{'='*45}")
+            print(f"IRRIGATION NEEDED:       {result['irrigation_mm']:>8.2f} mm")
 
         return result
 
@@ -187,7 +342,7 @@ def run_app_cycle():
     # Check if we have hourly data for Hybrid mode
     calc_mode = "Hybrid" if "hourly" in weather_package else "Strict"
     
-    engine = IrrigationEngine(crop_kc=1.15, soil_type="Clay")
+    engine = IrrigationEngine(crop_kcb=1.00, crop_kc=1.15, soil_type="Clay")
     result = engine.run_fao56_logic(weather_package, mode=calc_mode, verbose=True)
     print(f"Decision: {result['decision']}")
 

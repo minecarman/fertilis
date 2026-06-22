@@ -1,7 +1,46 @@
-frontend/.github/copilot-instructions.md
+# General
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Environment variables
+.env
 backend/.env
 ml_services/.env
+
+# Node.js (Backend)
+backend/node_modules/
+backend/npm-debug.log
+backend/yarn-error.log
+
+# Python (ML Services)
+__pycache__/
+*.py[cod]
+*$py.class
 venv/
 .venv/
-__pycache__/
+env/
+ml_services/venv/
+ml_services/.venv/
+ml_services/__pycache__/
 ml_services/yield_recommendation/model/amis_model.joblib
+
+# Flutter (Frontend)
+frontend/.dart_tool/
+frontend/build/
+frontend/.pub-cache/
+frontend/.packages
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/Flutter.podspec
+frontend/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+
+# Documents
+Fertilis_SeniorDesign_Final_Report.docx
+scratch/

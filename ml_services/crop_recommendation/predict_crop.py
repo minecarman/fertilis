@@ -9,12 +9,11 @@ class CropRecommender:
         self.scaler = package['scaler']
         self.label_encoder = package['label_encoder']
 
-    def predict(self, N, P, K, ph, temp_summer, temp_winter, rain_summer, rain_winter, altitude):
+    def predict(self, N, P, K, temperature, humidity, ph, rainfall):
         df = pd.DataFrame([{
-            "N": N, "P": P, "K": K, "ph": ph, 
-            "temp_summer": temp_summer, "temp_winter": temp_winter,
-            "rain_summer": rain_summer, "rain_winter": rain_winter,
-            "altitude": altitude
+            "N": N, "P": P, "K": K, 
+            "temperature": temperature, "humidity": humidity,
+            "ph": ph, "rainfall": rainfall
         }])
         
         df_scaled = self.scaler.transform(df)

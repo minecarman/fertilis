@@ -22,7 +22,7 @@ DATA_PATH = PROJECT_DIR / "data" / "data_clean.csv"
 MODEL_PATH = PROJECT_DIR / "model" / "amis_model.joblib"
 METADATA_PATH = PROJECT_DIR / "model" / "amis_model.metadata.json"
 
-TARGET = "Next_Year_Production"
+TARGET = "Production_Delta"
 FEATURES = [
     "Country/Region",
     "Commodity",
@@ -60,6 +60,10 @@ def load_dataset() -> pd.DataFrame:
         raise FileNotFoundError(f"Data file not found: {DATA_PATH}")
 
     df = pd.read_csv(DATA_PATH)
+    
+    # Calculate the Delta instead of absolute production
+    df["Production_Delta"] = df["Next_Year_Production"] - df["Production"]
+
     required_columns = FEATURES + [TARGET]
     missing_columns = [column for column in required_columns if column not in df.columns]
     if missing_columns:
@@ -98,6 +102,42 @@ def encode_features(df: pd.DataFrame, encoders: dict[str, LabelEncoder]) -> pd.D
     return encoded
 
 
+def tune_xgboost(X_train, y_train):
+    from xgboost import XGBRegressor
+    from sklearn.model_selection import RandomizedSearchCV, KFold
+    
+    print("Tuning XGBoost Regressor...")
+    base_model = XGBRegressor(
+        objective="reg:squarederror",
+        random_state=42,
+        n_jobs=-1
+    )
+    
+    param_dist = {
+        "n_estimators": [100, 300, 500],
+        "learning_rate": [0.01, 0.05, 0.1],
+        "max_depth": [4, 6, 8, 10],
+        "min_child_weight": [1, 3, 5],
+        "subsample": [0.8, 1.0],
+        "colsample_bytree": [0.8, 1.0],
+    }
+    
+    cv = KFold(n_splits=5, shuffle=True, random_state=42)
+    search = RandomizedSearchCV(
+        base_model,
+        param_distributions=param_dist,
+        n_iter=15,
+        scoring="neg_mean_absolute_error",
+        cv=cv,
+        verbose=1,
+        n_jobs=-1,
+        random_state=42
+    )
+    
+    search.fit(X_train, y_train)
+    print(f"Best parameters: {search.best_params_}")
+    return search.best_estimator_
+
 def main() -> None:
     df = prepare_training_frame(load_dataset())
     label_encoders = fit_label_encoders(df)
@@ -120,13 +160,8 @@ def main() -> None:
     X_train_scaled[numeric_columns] = scaler.fit_transform(X_train_scaled[numeric_columns])
     X_test_scaled[numeric_columns] = scaler.transform(X_test_scaled[numeric_columns])
 
-    model = RandomForestRegressor(
-        n_estimators=400,
-        random_state=42,
-        n_jobs=-1,
-        min_samples_leaf=1,
-    )
-    model.fit(X_train_scaled, y_train)
+    # Upgrade from Random Forest to tuned XGBoost
+    model = tune_xgboost(X_train_scaled, y_train)
 
     predictions = model.predict(X_test_scaled)
     metrics = {

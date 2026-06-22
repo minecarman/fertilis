@@ -76,15 +76,16 @@ class YieldPredictor:
         numeric_cols = [c for c in self.features if c not in self.label_encoders.keys()]
         X_pred[numeric_cols] = self.scaler.transform(X_pred[numeric_cols])
 
-        prediction = float(self.model.predict(X_pred)[0])
-        current_prod = float(latest_row['Production'].values[0]) if 'Production' in latest_row.columns else None
-        diff = prediction - current_prod if current_prod is not None else None
+        predicted_delta = float(self.model.predict(X_pred)[0])
+        current_prod = float(latest_row['Production'].values[0]) if 'Production' in latest_row.columns else 0.0
+        prediction_absolute = current_prod + predicted_delta
+        diff = predicted_delta
 
         return {
             "country": country,
             "commodity": commodity,
             "latest_season": latest_season,
-            "predicted_production_mt": round(prediction, 2),
+            "predicted_production_mt": round(prediction_absolute, 2),
             "current_production_mt": round(current_prod, 2) if current_prod is not None else None,
             "delta_mt": round(diff, 2) if diff is not None else None,
             "trend": self._trend_text(diff) if diff is not None else None,
